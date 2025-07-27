@@ -1,0 +1,57 @@
+<header
+  xmlns:th="http://www.thymeleaf.org"
+  style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid black;
+    font-size: 26px;
+  "
+>
+  <div style="display: flex; align-items: center; gap: 20px">
+    <strong>Arsipku</strong>
+    <div style="position: relative">
+      <input
+        type="text"
+        placeholder="Cari"
+        style="
+          padding: 5px 25px 5px 10px;
+          border-radius: 10px;
+          border: 1px solid #ccc;
+        "
+      />
+      <button
+        type="button"
+        style="
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+        "
+      >
+        ×
+      </button>
+    </div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 40px">
+    <a th:href="@{/arsip/new}" style="text-decoration: none; color: black"
+      >Buat arsip</a
+    >
+    <a th:href="@{/arsip/list}" style="text-decoration: none; color: black"
+      >List arsip</a
+    >
+    <a
+      th:href="@{/login}"
+      style="
+        background-color: #eee;
+        padding: 5px 10px;
+        text-decoration: none;
+        color: black;
+      "
+      >Masuk</a
+    >
+  </div>
+</header>

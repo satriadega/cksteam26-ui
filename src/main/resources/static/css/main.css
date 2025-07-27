@@ -1,0 +1,24 @@
+/* ===== CSS RESET ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+html,
+body {
+  line-height: 1;
+  font-size: 16px;
+}
+
+body {
+  font-family: "Inder", sans-serif;
+}
+
+/* ===== Import Google Font Inder ===== */
+@import url("https://fonts.googleapis.com/css2?family=Inder&display=swap");

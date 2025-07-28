@@ -4,7 +4,7 @@
     <title>Arsipku - Pengetahuan Bersama</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
     <style>
-      p.subtitle {
+      h2.subtitle {
         font-size: 24px;
         margin-top: 34px;
         text-align: center;
@@ -14,7 +14,7 @@
       }
       .archive-title {
         font-weight: bold;
-        margin-bottom: 1rem;
+        margin-bottom: 60px;
       }
       .archives {
         display: flex;
@@ -24,18 +24,22 @@
         max-width: 1000px;
         margin: 0 auto;
         text-align: left;
+        flex-wrap: wrap;
       }
       .archive-item {
-        max-width: 250px;
+        flex: 1 1 30%;
+        max-width: 30%;
+        box-sizing: border-box;
+        min-width: 250px;
       }
       .archive-item .author {
         font-style: italic;
         font-weight: 600;
-        margin-bottom: 0.3rem;
+        margin-bottom: 1.3rem;
       }
       .archive-item .title {
         font-weight: bold;
-        margin-bottom: 0.2rem;
+        margin-bottom: 1.2rem;
       }
       .archive-item .date {
         color: #666;
@@ -43,38 +47,42 @@
     </style>
   </head>
   <body>
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-    <h1 style="font-size: 96px; text-align: center; margin-top: 70px">
-      Pengetahuan<br />Bersama
-    </h1>
-    <p class="subtitle">
-      Ruang untuk mendokumentasikan, berbagi, dan menelusuri hal-hal penting.
-    </p>
-    <button
-      style="
-        display: block;
-        margin: 20px auto;
-        background-color: blue;
-        padding: 20px;
-      "
-    >
-      Mulai
-    </button>
+    <div>
+      <h1 style="font-size: 96px; text-align: center; margin-top: 70px">
+        Pengetahuan<br />Bersama
+      </h1>
+      <h2 class="subtitle">
+        Ruang untuk mendokumentasikan, berbagi, dan menelusuri hal-hal penting.
+      </h2>
+      <a th:href="@{/document}" style="text-decoration: none">
+        <button
+          style="
+            display: block;
+            margin: 40px auto;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 20px;
+            border-radius: 10px;
+          "
+        >
+          Mulai
+        </button>
+      </a>
 
-    <hr />
+      <hr />
 
-    <section class="archive-section">
-      <div class="archive-title">Arsip terbaru</div>
-      <div class="archives">
-        <div class="archive-item" th:each="archive : ${archives}">
-          <div class="author" th:text="${archive.author}">Kevin Wahyudi</div>
-          <div class="title" th:text="${archive.title}">
-            On the Unseen Cost ...
+      <section class="archive-section" th:if="${archives != null}">
+        <div class="archive-title marker">Arsip terbaru</div>
+        <div class="archives">
+          <div class="archive-item" th:each="archive : ${archives}">
+            <div class="author marker" th:text="${archive.author}"></div>
+            <div class="title" th:text="${archive.title}"></div>
+            <div class="date" th:text="${archive.date}"></div>
           </div>
-          <div class="date" th:text="${archive.date}">July 4</div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </body>
 </html>

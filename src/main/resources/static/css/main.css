@@ -18,7 +18,34 @@ body {
 
 body {
   font-family: "Inder", sans-serif;
+  background-color: #ffe0b2;
+  color: #555555;
+  margin-bottom: 64px;
 }
 
+h1 {
+  color: #222222;
+}
+
+h2 {
+  color: #222222;
+}
+
+.marker {
+  color: #222222;
+}
+a {
+  color: #222222;
+}
+
+button:hover {
+  background-color: #4480c4;
+  transition: background-color 0.3s ease;
+}
+
+button {
+  cursor: pointer;
+  background-color: #eee;
+}
 /* ===== Import Google Font Inder ===== */
 @import url("https://fonts.googleapis.com/css2?family=Inder&display=swap");

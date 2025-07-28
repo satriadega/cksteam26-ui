@@ -4,22 +4,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 24px 32px;
     border-bottom: 1px solid black;
     font-size: 26px;
+    background-color: #2c67aa;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
   "
 >
   <div style="display: flex; align-items: center; gap: 20px">
-    <strong>Arsipku</strong>
+    <h1 style="font-weight: 800; color: white">Arsipku</h1>
     <div style="position: relative">
       <input
         type="text"
         placeholder="Cari"
-        style="
-          padding: 5px 25px 5px 10px;
-          border-radius: 10px;
-          border: 1px solid #ccc;
-        "
+        style="padding: 5px 25px; border-radius: 30px; border: 1px solid #eee"
       />
       <button
         type="button"
@@ -30,6 +30,9 @@
           transform: translateY(-50%);
           background: none;
           border: none;
+          font-size: 20px;
+          cursor: pointer;
+          color: #555;
         "
       >
         ×
@@ -37,19 +40,21 @@
     </div>
   </div>
   <div style="display: flex; align-items: center; gap: 40px">
-    <a th:href="@{/arsip/new}" style="text-decoration: none; color: black"
+    <a th:href="@{/arsip/new}" style="text-decoration: none; color: white"
       >Buat arsip</a
     >
-    <a th:href="@{/arsip/list}" style="text-decoration: none; color: black"
+    <a th:href="@{/arsip/list}" style="text-decoration: none; color: white"
       >List arsip</a
     >
     <a
       th:href="@{/login}"
       style="
         background-color: #eee;
-        padding: 5px 10px;
+        padding: 15px 20px;
         text-decoration: none;
-        color: black;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #2c67aa;
       "
       >Masuk</a
     >

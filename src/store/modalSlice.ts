@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface ModalState {
   isOpen: boolean;
-  type: 'success' | 'error' | null;
+  type: 'success' | 'error' | 'loading' | null;
   message: string;
   onConfirm?: () => void;
   onCancel?: () => void;
@@ -20,7 +20,7 @@ const modalSlice = createSlice({
   name: 'modal',
   initialState,
   reducers: {
-    showModal: (state, action: PayloadAction<{ type: 'success' | 'error'; message: string; onConfirm?: () => void; onCancel?: () => void }>) => {
+    showModal: (state, action: PayloadAction<{ type: 'success' | 'error' | 'loading'; message: string; onConfirm?: () => void; onCancel?: () => void }>) => {
       state.isOpen = true;
       state.type = action.payload.type;
       state.message = action.payload.message;

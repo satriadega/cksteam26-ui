@@ -45,7 +45,7 @@ const LandingPage: React.FC = () => {
   return (
     <div>
       <div className="text-center">
-        <h1 className="text-8xl mt-16 text-title">
+        <h1 className="text-8xl mt-24 text-title">
           Pengetahuan
           <br />
           Bersama
@@ -54,8 +54,8 @@ const LandingPage: React.FC = () => {
           Ruang untuk mendokumentasikan, berbagi, dan menelusuri hal-hal
           penting.
         </h2>
-        <Link to="/document">
-          <button className="mt-10 py-5 px-5 font-semibold text-xl rounded-lg bg-button-highlight-blue text-white hover:bg-blue-900">
+        <Link to="/arsip">
+          <button className="mt-10 py-5 px-5 font-semibold text-xl rounded-lg bg-accent text-white hover:bg-button-highlight-blue">
             Mulai
           </button>
         </Link>
@@ -77,10 +77,15 @@ const LandingPage: React.FC = () => {
         {status === "succeeded" && (
           <div className="flex justify-center gap-12 flex-wrap max-w-5xl mx-auto text-left">
             {documents.slice(0, 3).map((document: Document) => (
-              <div key={document.id} className="flex-1 basis-1/4 min-w-64">
-                <div className="font-semibold italic mb-5 text-link-nav">
-                  {document.title}
-                </div>
+              <div
+                key={document.id}
+                className="flex-1 basis-1/4 min-w-64 p-4 border rounded-md shadow-md bg-primary"
+              >
+                <Link to={`/arsip/${document.id}`}>
+                  <div className="font-semibold italic mb-5 text-link-nav hover:underline">
+                    {document.title}
+                  </div>
+                </Link>
                 <div className="font-bold mb-5 text-title">
                   {document.content}
                 </div>

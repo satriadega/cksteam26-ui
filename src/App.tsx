@@ -7,8 +7,8 @@ import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
 import Layout from './components/layout/Layout';
 import NotFoundPage from './pages/NotFoundPage';
 import { isAuthenticated } from './utils/auth';
-
-const DocumentPage = () => <div>Document Page</div>;
+import ArsipPage from './pages/ArsipPage';
+import DocumentDetailPage from './pages/DocumentDetailPage';
 
 function App() {
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,7 +24,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/document" element={<DocumentPage />} />
+          <Route path="/arsip/:id" element={<DocumentDetailPage />} />
+          <Route path="/arsip" element={<ArsipPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

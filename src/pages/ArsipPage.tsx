@@ -1,0 +1,105 @@
+import React, { useState, useEffect } from "react";
+import { getDocuments } from "../api";
+import type { Document } from "../types/document";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { showModal, hideModal } from "../store/modalSlice";
+import type { RootState } from "../store";
+
+const ArsipPage: React.FC = () => {
+  const dispatch = useDispatch();
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      dispatch(showModal({ type: "loading", message: "Loading..." }));
+      try {
+        const response = await getDocuments(
+          currentPage - 1,
+          searchTerm?.trim() || undefined
+        );
+        setDocuments(response.data.data.content);
+        setTotalPages(response.data.data.total_pages);
+      } catch (error) {
+        console.error("Error fetching documents:", error);
+      } finally {
+        dispatch(hideModal());
+      }
+    };
+
+    fetchDocuments();
+  }, [currentPage, searchTerm, dispatch]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  return (
+    <div className="p-8">
+      {documents.map((document) => (
+        <div
+          key={document.id}
+          className="mb-8 p-6 border rounded-md bg-primary shadow-md"
+        >
+          <h2 className="text-3xl font-bold mb-2 text-title">
+            {document.title}{" "}
+            <span className="text-lg font-normal text-text-light">
+              Version {document.version + 1}.{document.subversion}
+            </span>
+          </h2>
+          <p className="text-text-main mb-4">{document.content}</p>
+          <div className="mb-4">
+            <span className="font-semibold text-text-main">#Tags</span>
+            {document.tags &&
+              document.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="ml-2 px-2 py-1 bg-secondary text-text-main text-sm rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+          </div>
+          <div className="text-text-light text-sm">
+            {document.name} &bull;{" "}
+            {new Date(document.createdAt).toLocaleDateString()} &bull; Memiliki{" "}
+            {document.annotationCount} Pengetahuan
+          </div>
+          <button
+            onClick={() => navigate(`/arsip/${document.id}`)}
+            className="mt-2 px-4 py-2 bg-accent text-white rounded-md hover:bg-button-highlight-blue"
+          >
+            Lihat Versi
+          </button>
+        </div>
+      ))}
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-8 space-x-2">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === page
+                ? "bg-accent text-white"
+                : "bg-primary text-text-main hover:bg-secondary"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ArsipPage;

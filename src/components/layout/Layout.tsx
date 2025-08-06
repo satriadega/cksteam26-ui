@@ -8,7 +8,14 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
 
   const authPaths = ["/login", "/register", "/verify-registration"];
-  const knownPaths = ["/", ...authPaths, "/dashboard", "/verify-registration"];
+  const knownPaths = [
+    "/",
+    ...authPaths,
+    "/dashboard",
+    "/verify-registration",
+    "/arsip",
+    "/arsip/*",
+  ];
   const isKnownPath = knownPaths.some((path) =>
     matchPath({ path, end: true }, location.pathname)
   );

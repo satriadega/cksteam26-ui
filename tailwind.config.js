@@ -4,14 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#FAFAFA",
-        title: "#000000",
-        "button-highlight": {
-          blue: "#0D47A1",
-          maroon: "#8B0000",
-        },
-        "text-main": "#6E6E6E",
-        "link-nav": "#003366",
+        background: '#F5F5F5',
+        primary: '#E0E0E0',
+        secondary: '#BDBDBD',
+        'text-main': '#424242',
+        'text-light': '#757575',
+        accent: '#8D6E63',
+        'link-nav': '#6D4C41',
+        'button-highlight-blue': '#A1887F',
+        title: '#000000',
       },
       fontFamily: {
         inder: ['"Inder"', "sans-serif"],

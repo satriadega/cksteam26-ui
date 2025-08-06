@@ -82,22 +82,23 @@ const ArsipPage: React.FC = () => {
         </div>
       ))}
 
-      {/* Pagination */}
-      <div className="flex justify-center mt-8 space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`px-4 py-2 rounded-md ${
-              currentPage === page
-                ? "bg-accent text-white"
-                : "bg-primary text-text-main hover:bg-secondary"
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      {documents.length > 0 && (
+        <div className="flex justify-center mt-8 space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-4 py-2 rounded-md ${
+                currentPage === page
+                  ? "bg-accent text-white"
+                  : "bg-primary text-text-main hover:bg-secondary"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

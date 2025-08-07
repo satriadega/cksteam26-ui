@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchTerm } from "../../store/searchSlice";
 import type { RootState } from "../../store";
+import { getProfile } from "../../api";
 
 const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const dispatch = useDispatch();
@@ -11,16 +12,37 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const searchTerm = useSelector((state: RootState) => state.search.searchTerm);
   const [inputValue, setInputValue] = React.useState(searchTerm);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const fetchNotificationCount = async () => {
+      try {
+        const response = await getProfile();
+        setNotificationCount(response.data.data[0].notificationCounter);
+      } catch (error) {
+        console.error("Failed to fetch notification count:", error);
+      }
+    };
+
+    fetchNotificationCount();
+
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setDropdownOpen(false);
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -130,15 +152,18 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             Dashboard
           </Link>
 
-          <div className="relative flex items-center">
+          <div className="relative flex items-center" ref={notificationRef}>
             <div className="relative mr-8">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-white cursor-pointer hover:text-accent transition-colors duration-200"
+                className="h-[40px] w-[40px] text-white cursor-pointer hover:text-accent transition-colors duration-200"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2}
+                onClick={() =>
+                  setNotificationDropdownOpen(!notificationDropdownOpen)
+                }
               >
                 <path
                   strokeLinecap="round"
@@ -146,9 +171,29 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
               </svg>
-              <span className="absolute bottom-4 left-4 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-lg">
-                3
-              </span>
+              {notificationCount > 0 && (
+                <span className="absolute bottom-6 left-6 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-lg">
+                  {notificationCount}
+                </span>
+              )}
+              {notificationDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
+                  <Link
+                    to="/list-verifier"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setNotificationDropdownOpen(false)}
+                  >
+                    List Verifier
+                  </Link>
+                  <Link
+                    to="/list-appliance"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setNotificationDropdownOpen(false)}
+                  >
+                    List Appliance
+                  </Link>
+                </div>
+              )}
             </div>
 
             <button

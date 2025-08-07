@@ -1,11 +1,27 @@
 import axios from "axios";
-import { isAuthenticated } from "../utils/auth";
+import { isAuthenticated, clearAuth } from "../utils/auth";
 
 const API_URL = "http://localhost:8081";
 
 import type { AxiosRequestConfig } from "axios";
 
-export const getDocuments = (page = 0, searchTerm = "") => {
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+const getAuthHeaders = (): AxiosRequestConfig["headers"] => {
   const headers: AxiosRequestConfig["headers"] = {};
   if (isAuthenticated()) {
     const token = localStorage.getItem("token");
@@ -13,49 +29,53 @@ export const getDocuments = (page = 0, searchTerm = "") => {
       headers.Authorization = `Bearer ${token}`;
     }
   }
+  return headers;
+};
+
+export const getDocuments = (page = 0, searchTerm = "") => {
   const params: { page: number; keyword?: string } = { page };
   if (searchTerm?.trim()) {
     params.keyword = searchTerm.trim();
   }
 
-  return axios.get(`${API_URL}/public/document`, {
-    headers,
+  return api.get("/public/document", {
+    headers: getAuthHeaders(),
     params,
-    withCredentials: true,
   });
 };
 
 export const getDocumentById = (id: number) => {
-  const headers: AxiosRequestConfig["headers"] = {};
-  if (isAuthenticated()) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return axios.get(`${API_URL}/public/document/${id}`, { headers, withCredentials: true });
+  return api.get(`/public/document/${id}`, { headers: getAuthHeaders() });
 };
 
 export const getProfile = () => {
-  const headers: AxiosRequestConfig["headers"] = {};
-  if (isAuthenticated()) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return axios.get(`${API_URL}/profile`, { headers, withCredentials: true });
+  return api.get("/profile", { headers: getAuthHeaders() });
 };
 
 export const updateProfile = (data: { name: string; password?: string; statusNotification: boolean }) => {
-  const headers: AxiosRequestConfig["headers"] = {
-    "Content-Type": "application/json"
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
   };
-  if (isAuthenticated()) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return axios.put(`${API_URL}/profile`, data, { headers, withCredentials: true });
+  return api.put("/profile", data, { headers });
+};
+
+export const createDocument = (data: {
+  title: string;
+  content: string;
+  publicVisibility: boolean;
+  referenceDocumentId: number | null;
+  version: number;
+  subversion: number;
+  private: boolean;
+}) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+  return api.post("/document", data, { headers });
+};
+
+export const getRelatedDocuments = (documentId: number) => {
+  return api.get(`/document/${documentId}/related`, { headers: getAuthHeaders() });
 };

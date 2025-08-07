@@ -10,6 +10,7 @@ interface Document {
   content: string;
   createdAt: string;
   updatedAt: string | null;
+  name: string;
   publicVisibility: boolean;
   version: number;
   subversion: number;
@@ -43,9 +44,9 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="mx-4">
       <div className="text-center">
-        <h1 className="text-8xl mt-24 text-title">
+        <h1 className="text-6xl md:text-8xl mt-24 text-title">
           Pengetahuan
           <br />
           Bersama
@@ -75,19 +76,20 @@ const LandingPage: React.FC = () => {
         )}
 
         {status === "succeeded" && (
-          <div className="flex justify-center gap-12 flex-wrap max-w-5xl mx-auto text-left">
+          <div className="flex justify-center gap-12 flex-wrap max-w-5xl md:mx-auto text-left mb-4">
             {documents.slice(0, 3).map((document: Document) => (
               <div
                 key={document.id}
                 className="flex-1 basis-1/4 min-w-64 p-4 border rounded-md shadow-md bg-primary"
               >
                 <Link to={`/arsip/${document.id}`}>
-                  <div className="font-semibold italic mb-5 text-link-nav hover:underline">
+                  <div className="font-bold mb-5 text-xl  text-link-nav">
                     {document.title}
                   </div>
                 </Link>
-                <div className="font-bold mb-5 text-title">
-                  {document.content}
+                <div className="font-semibold italic mb-5 text-title ">
+                  Dibuat oleh
+                  {document.name}
                 </div>
                 <div className="text-text-main">
                   {formatDate(document.createdAt)}

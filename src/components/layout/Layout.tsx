@@ -20,6 +20,7 @@ const Layout: React.FC = () => {
     "/arsip",
     "/arsip/*",
     "/profile",
+    "/buat-arsip",
   ];
   const isKnownPath = knownPaths.some((path) =>
     matchPath({ path, end: true }, location.pathname)

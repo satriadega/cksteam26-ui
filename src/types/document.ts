@@ -15,3 +15,8 @@ export interface Document {
   name: string;
   annotationCount: number;
 }
+
+export interface RelatedDocument extends Document {
+  description: string;
+  verifiedBy: string;
+}

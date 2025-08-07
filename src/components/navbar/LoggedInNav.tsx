@@ -329,7 +329,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   </span>
                 )}
                 {notificationDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
+                  <div className="absolute left-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
                     <Link
                       to="/list-verifier"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -373,6 +373,15 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                 </svg>
               </button>
             </div>
+            <Link
+              to="/dashboard"
+              className="text-white hover:text-text-main"
+              onClick={() => {
+                toggleMobileMenu();
+              }}
+            >
+              Dashboard
+            </Link>
 
             <Link
               to="/buat-arsip"
@@ -392,15 +401,6 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
               }}
             >
               List arsip
-            </Link>
-            <Link
-              to="/dashboard"
-              className="text-white hover:text-text-main"
-              onClick={() => {
-                toggleMobileMenu();
-              }}
-            >
-              Dashboard
             </Link>
             <Link
               to="/profile"
@@ -455,7 +455,10 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             )}
             <button
               type="button"
-              onClick={handleSearch}
+              onClick={() => {
+                handleSearch();
+                toggleMobileMenu();
+              }}
               className="relative text-gray-400 hover:text-gray-700 left-8"
             >
               <svg

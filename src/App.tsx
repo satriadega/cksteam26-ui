@@ -8,8 +8,9 @@ import Layout from './components/layout/Layout';
 import NotFoundPage from './pages/NotFoundPage';
 import { isAuthenticated } from './utils/auth';
 import ArsipPage from './pages/ArsipPage';
-import DocumentDetailPage from './pages/DocumentDetailPage';
+import DetailArsipPage from './pages/DetailArsipPage';
 import ProfilePage from './pages/ProfilePage';
+import BuatArsipPage from './pages/BuatArsipPage';
 
 function App() {
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -25,9 +26,10 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/arsip/:id" element={<DocumentDetailPage />} />
+          <Route path="/arsip/:id" element={<DetailArsipPage />} />
           <Route path="/arsip" element={<ArsipPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/buat-arsip" element={<ProtectedRoute><BuatArsipPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

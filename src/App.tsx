@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import { isAuthenticated } from './utils/auth';
 import ArsipPage from './pages/ArsipPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/arsip/:id" element={<DocumentDetailPage />} />
           <Route path="/arsip" element={<ArsipPage />} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

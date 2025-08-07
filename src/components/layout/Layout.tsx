@@ -1,11 +1,15 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation, matchPath } from "react-router-dom";
 import { LoggedInNav, LoggedOutNav } from "../navbar";
-import { isAuthenticated, getUsernameFromToken } from "../../utils/auth";
+import { isAuthenticated } from "../../utils/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUser } from "../../store/userSlice";
+import type { RootState } from "../../store";
 
 const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const authPaths = ["/login", "/register", "/verify-registration"];
   const knownPaths = [
@@ -15,6 +19,7 @@ const Layout: React.FC = () => {
     "/verify-registration",
     "/arsip",
     "/arsip/*",
+    "/profile",
   ];
   const isKnownPath = knownPaths.some((path) =>
     matchPath({ path, end: true }, location.pathname)
@@ -22,22 +27,23 @@ const Layout: React.FC = () => {
 
   const showNavbar = isKnownPath && !authPaths.includes(location.pathname);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
   const handleLogin = () => {
     navigate("/login");
   };
 
-  const username = isAuthenticated() ? getUsernameFromToken() : "";
+  const handleLogout = () => {
+    dispatch(clearUser());
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const username = useSelector((state: RootState) => state.user.username);
 
   return (
     <div>
       {showNavbar &&
         (isAuthenticated() ? (
-          <LoggedInNav onLogout={handleLogout} username={username} />
+          <LoggedInNav username={username || ""} onLogout={handleLogout} />
         ) : (
           <LoggedOutNav onLogin={handleLogin} />
         ))}

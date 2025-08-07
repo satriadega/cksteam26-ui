@@ -21,6 +21,7 @@ export const getDocuments = (page = 0, searchTerm = "") => {
   return axios.get(`${API_URL}/public/document`, {
     headers,
     params,
+    withCredentials: true,
   });
 };
 
@@ -32,5 +33,29 @@ export const getDocumentById = (id: number) => {
       headers.Authorization = `Bearer ${token}`;
     }
   }
-  return axios.get(`${API_URL}/public/document/${id}`, { headers });
+  return axios.get(`${API_URL}/public/document/${id}`, { headers, withCredentials: true });
+};
+
+export const getProfile = () => {
+  const headers: AxiosRequestConfig["headers"] = {};
+  if (isAuthenticated()) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return axios.get(`${API_URL}/profile`, { headers, withCredentials: true });
+};
+
+export const updateProfile = (data: { name: string; password?: string; statusNotification: boolean }) => {
+  const headers: AxiosRequestConfig["headers"] = {
+    "Content-Type": "application/json"
+  };
+  if (isAuthenticated()) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return axios.put(`${API_URL}/profile`, data, { headers, withCredentials: true });
 };

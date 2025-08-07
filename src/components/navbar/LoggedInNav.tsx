@@ -152,7 +152,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
               </svg>
             </button>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-8 mr-8">
             <Link
               to="/buat-arsip"
               className="text-white hover:text-text-main mr-4"
@@ -216,7 +216,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   </div>
                 )}
               </div>
-
+              <div className="w-8"></div>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="bg-button-highlight-blue hover:bg-accent text-white font-bold py-2 px-4 rounded flex items-center gap-2"
@@ -322,8 +322,9 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
+
                 {notificationCount > 0 && (
-                  <span className="absolute bottom-6 left-6 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-lg">
+                  <span className="absolute bottom-6 left-6 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-lg z-[999]">
                     {notificationCount}
                   </span>
                 )}

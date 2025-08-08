@@ -45,14 +45,21 @@ export const getDocuments = (page = 0, searchTerm = "") => {
 };
 
 export const getDocumentById = (id: number) => {
-  return api.get(`/public/document/${id}`, { headers: getAuthHeaders() });
+  return api.get(`/public/document/${id}`, { headers: getAuthHeaders() })
+    .then(response => {
+      return response.data;
+    });
 };
 
 export const getProfile = () => {
   return api.get("/profile", { headers: getAuthHeaders() });
 };
 
-export const updateProfile = (data: { name: string; password?: string; statusNotification: boolean }) => {
+export const updateProfile = (data: {
+  name: string;
+  password?: string;
+  statusNotification: boolean;
+}) => {
   const headers = {
     "Content-Type": "application/json",
     ...getAuthHeaders(),
@@ -73,9 +80,34 @@ export const createDocument = (data: {
     "Content-Type": "application/json",
     ...getAuthHeaders(),
   };
-  return api.post("/document", data, { headers });
+  return api.post("/document", data, { headers }).then((response) => {
+    return response.data;
+  });
 };
 
 export const getRelatedDocuments = (documentId: number) => {
-  return api.get(`/document/${documentId}/related`, { headers: getAuthHeaders() });
+  return api.get(`/public/document/${documentId}`, {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const getAnnotationsByDocumentId = (documentId: number) => {
+  return api.get(`/public/annotation/document/${documentId}`, {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const createAnnotation = (data: {
+  documentId: number;
+  selectedText: string;
+  startNo: number;
+  endNo: number;
+  description: string;
+  tags: string[];
+}) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+  return api.post("/annotation", data, { headers });
 };

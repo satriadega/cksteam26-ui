@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { createDocument } from "../api";
+import { showModal } from "../store/modalSlice";
 
 const BuatArsipPage: React.FC = () => {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState("");
   const [visibility, setVisibility] = useState("Publik");
   const [content, setContent] = useState("");
@@ -32,13 +35,25 @@ const BuatArsipPage: React.FC = () => {
     };
 
     try {
-      await createDocument(documentData);
-      alert("Arsip berhasil dibuat!");
-      // Optionally redirect to another page, e.g., list of arsips
-      // navigate('/arsip');
+      const response = await createDocument(documentData);
+      const documentId = response.data.documentId;
+      dispatch(
+        showModal({
+          type: "success",
+          message: `Arsip berhasil dibuat!`,
+          onConfirm: () => {
+            window.location.href = `/tambah-pengetahuan?documentId=${documentId}`;
+          },
+        })
+      );
     } catch (error) {
       console.error("Gagal membuat arsip:", error);
-      alert("Gagal membuat arsip. Silakan coba lagi.");
+      dispatch(
+        showModal({
+          type: "error",
+          message: "Gagal membuat arsip. Silakan coba lagi.",
+        })
+      );
     }
   };
 
@@ -51,7 +66,7 @@ const BuatArsipPage: React.FC = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             handlePublish();
           }
         }}

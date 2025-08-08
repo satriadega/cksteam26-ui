@@ -55,14 +55,14 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
   return (
     <div className="sticky top-0 z-10 shadow-md">
       <nav className="bg-link-nav p-4 flex justify-between items-center relative">
-        <div className="flex items-center md:hidden">
+        <div className="flex items-center xl:hidden">
           <a href="/" className="text-3xl font-bold text-title mr-4">
             Arsipku
           </a>
         </div>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex items-center space-x-4 gap-8 justify-between w-full">
+        <div className="hidden xl:flex items-center space-x-4 gap-8 justify-between w-full">
           <div className="flex items-center space-x-4">
             <a href="/" className="text-3xl font-bold text-title mr-4">
               Arsipku
@@ -140,7 +140,7 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
           </div>
         </div>
         {/* Mobile menu button */}
-        <div className="md:hidden">
+        <div className="xl:hidden">
           <button
             onClick={toggleMobileMenu}
             className="text-white focus:outline-none"
@@ -174,7 +174,7 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div
-          className="md:hidden bg-link-nav fixed top-0 left-0 w-full h-screen z-50"
+          className="xl:hidden bg-link-nav fixed top-0 left-0 w-full h-screen z-50"
           ref={mobileMenuRef}
         >
           <div className="flex flex-col items-center gap-4 p-4">

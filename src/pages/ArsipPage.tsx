@@ -50,20 +50,25 @@ const ArsipPage: React.FC = () => {
   }, [searchTerm]);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto mt-8">
       {documents.map((document) => (
         <div
           key={document.id}
           className="mb-8 p-6 border rounded-md bg-primary shadow-md"
         >
           <h2 className="text-3xl font-bold mb-2 text-title flex justify-between items-start">
-            {document.title}{" "}
+            <span
+              className="underline cursor-pointer"
+              onClick={() => navigate(`/arsip/${document.id}`)}
+            >
+              {document.title}
+            </span>
             <div className="flex flex-col items-end">
               <span className="text-lg font-normal text-text-light">
                 Version {document.version + 1}.{document.subversion}
               </span>
               <button
-                onClick={() => navigate(`/arsip/${document.id}`)}
+                onClick={() => {}}
                 className="mt-2 px-4 py-2 bg-accent text-white rounded-md hover:bg-button-highlight-blue text-sm"
               >
                 Lihat Versi
@@ -71,8 +76,8 @@ const ArsipPage: React.FC = () => {
             </div>
           </h2>
           <p className="text-text-main mb-4">
-            {document.content.length > 100
-              ? `${document.content.substring(0, 100)}...`
+            {document.content.length > 250
+              ? `${document.content.substring(0, 250)}...`
               : document.content}
           </p>
           <div className="mb-4">
@@ -84,7 +89,7 @@ const ArsipPage: React.FC = () => {
                     key={index}
                     className="ml-2 px-2 py-1 bg-secondary text-text-main text-sm rounded-full"
                   >
-                    {tag}
+                    {tag.tagName}
                   </span>
                 ))}
               </span>
@@ -97,7 +102,7 @@ const ArsipPage: React.FC = () => {
           <div className="text-text-light text-sm">
             {document.name} &bull;{" "}
             {new Date(document.createdAt).toLocaleDateString()} &bull;{" "}
-            {document.annotationCount > 0
+            {document.annotationCount !== null && document.annotationCount > 0
               ? `Memiliki ${document.annotationCount} Pengetahuan`
               : "Belum memiliki pengetahuan"}
           </div>

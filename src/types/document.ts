@@ -1,22 +1,43 @@
+export interface Tag {
+  id: number;
+  tagName: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface Annotation {
+  id: number; // Added id property
+  documentId: number;
+  ownerUserId: number;
+  isVerified: boolean;
+  selectedText: string;
+  startNo: number;
+  endNo: number;
+  description: string;
+  tags: Tag[];
+  verified: boolean;
+  verifiedBy: string; // Added verifiedBy property based on usage in TambahPengetahuanPage.tsx
+}
+
 export interface Document {
   id: number;
   title: string;
   content: string;
+  publicVisibility: boolean;
   referenceDocumentId: number | null;
   version: number;
   subversion: number;
-  createdAt: string;
-  updatedAt: string | null;
-  publicVisibility: boolean;
-  annotations: object | null;
-  tags: string[];
   private: boolean;
-  verifiedAll: boolean;
   name: string;
-  annotationCount: number;
+  createdAt: string;
+  tags: Tag[] | null;
+  annotationCount: number | null;
+  annotations: Annotation[] | null;
+  username: string;
 }
 
 export interface RelatedDocument extends Document {
   description: string;
   verifiedBy: string;
+  tags: Tag[];
 }

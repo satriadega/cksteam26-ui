@@ -32,11 +32,14 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   };
 
   const handleSearch = () => {
+    setMobileMenuOpen(false);
     dispatch(setSearchTerm(inputValue));
     navigate("/arsip");
   };
@@ -244,7 +247,7 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
             {inputValue && (
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700"
                 onClick={handleClearSearch}
               >
                 <svg
@@ -265,7 +268,10 @@ const LoggedOutNav: React.FC<NavbarLoggedOutProps> = () => {
             )}
             <button
               type="button"
-              onClick={handleSearch}
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleSearch();
+              }}
               className="relative text-gray-400 hover:text-gray-700 left-8"
             >
               <svg

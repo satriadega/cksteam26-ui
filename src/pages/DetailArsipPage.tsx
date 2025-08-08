@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getDocumentById, getProfile } from "../api";
-import type { Document } from "../types/document";
+import { getDocumentById, getProfile, getRelatedDocuments } from "../api";
+import type { Document, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
@@ -10,15 +10,23 @@ import type { RootState } from "../store";
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffTime = Math.abs(today.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays <= 1) {
-    return "Hari ini";
-  } else {
-    return `${diffDays} hari yang lalu`;
-  }
+  const dateForComparison = new Date(date);
+  dateForComparison.setHours(0, 0, 0, 0);
+  const todayForComparison = new Date(today);
+  todayForComparison.setHours(0, 0, 0, 0);
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  const formatter = new Intl.DateTimeFormat('id-ID', options);
+  const diffDays = Math.floor((todayForComparison.getTime() - dateForComparison.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays === 0 ? `Hari ini, ${formatter.format(date)}` : `${diffDays} hari yang lalu, ${formatter.format(date)}`;
 };
 
 const DetailArsipPage: React.FC = () => {
@@ -26,6 +34,8 @@ const DetailArsipPage: React.FC = () => {
   const dispatch = useDispatch();
   const [document, setDocument] = useState<Document | null>(null);
   const [userProfile, setUserProfile] = useState({ username: "" });
+  const [versions, setVersions] = useState<Version[]>([]);
+  const [showVersions, setShowVersions] = useState(false);
   const { isAuthenticated, username: reduxUsername } = useSelector(
     (state: RootState) => state.user
   );
@@ -95,6 +105,29 @@ const DetailArsipPage: React.FC = () => {
     }
   }, [userProfile, document]);
 
+  const handleShowVersions = async () => {
+    if (document && document.referenceDocumentId) {
+      try {
+        const response = await getRelatedDocuments(
+          document.referenceDocumentId
+        );
+        if (response.data.data.length === 0) {
+          dispatch(
+            showModal({
+              type: "info",
+              message: "Belum ada versi lain.",
+            })
+          );
+        } else {
+          setVersions(response.data.data);
+          setShowVersions(!showVersions);
+        }
+      } catch (error) {
+        console.error("Error fetching related documents:", error);
+      }
+    }
+  };
+
   if (!document) {
     return null;
   }
@@ -113,18 +146,39 @@ const DetailArsipPage: React.FC = () => {
           {document.title}
         </h1>
         <p className="text-text-light text-sm">
-          {document.name}
+          Dibuat oleh {document.name}
           <br />
           Dipublish {formatDate(document.createdAt)}
         </p>
       </div>
       <div className="text-right">
         <p className="text-text-main text-sm mb-2">
-          Version {document.version + 1}.{document.subversion}
+          Version {document.version + 1}.{document.subversion || 0}
         </p>
-        <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-          Lihat Versi
-        </button>
+        <div className="relative">
+          <button
+            onClick={handleShowVersions}
+            className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+          >
+            Lihat Versi
+          </button>
+          {showVersions && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+              <ul>
+                {versions.map((version) => (
+                  <li
+                    key={version.id}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
+                  >
+                    <Link to={`/arsip/${version.id}`}>
+                      Version {version.version + 1}.{version.subversion || 0}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
       <div
@@ -144,7 +198,7 @@ const DetailArsipPage: React.FC = () => {
                 </button>
               </Link>
               <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                Edit Artikel
+                Tambahkan versi
               </button>
             </>
           ) : (
@@ -160,19 +214,28 @@ const DetailArsipPage: React.FC = () => {
         <div className="flex flex-wrap">
           {(() => {
             const allTags = document.annotations.flatMap((a) => a.tags);
-            console.log("DetailArsipPage - All raw tags:", allTags.map(tag => tag.tagName)); // Log raw tag names
+            console.log(
+              "DetailArsipPage - All raw tags:",
+              allTags.map((tag) => tag.tagName)
+            ); // Log raw tag names
 
             const uniqueTagsMap = new Map<string, string>(); // Map: lowercaseTagName -> originalTagName
-            allTags.forEach(tag => {
+            allTags.forEach((tag) => {
               const lowerCaseTagName = tag.tagName.toLowerCase();
               if (!uniqueTagsMap.has(lowerCaseTagName)) {
                 uniqueTagsMap.set(lowerCaseTagName, tag.tagName);
               }
             });
             const uniqueTagNamesToDisplay = Array.from(uniqueTagsMap.values());
-            console.log("DetailArsipPage - Unique Tag Names to Display (after deduplication):", uniqueTagNamesToDisplay);
+            console.log(
+              "DetailArsipPage - Unique Tag Names to Display (after deduplication):",
+              uniqueTagNamesToDisplay
+            );
             return uniqueTagNamesToDisplay.map((tagName) => (
-              <span key={tagName} className="inline-block mr-2 px-2 py-1 bg-gray-200 rounded">
+              <span
+                key={tagName}
+                className="inline-block mr-2 px-2 py-1 bg-gray-200 rounded"
+              >
                 {tagName}
               </span>
             ));
@@ -193,17 +256,19 @@ const DetailArsipPage: React.FC = () => {
               <p className="text-text-main text-sm mb-1">
                 Description: {annotation.description}
               </p>
-              <div className="flex flex-wrap items-center text-text-light text-sm mb-1">
-                <span className="mr-2">Tags:</span>
-                {annotation.tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="ml-2 px-2 py-1 bg-gray-200 rounded"
-                  >
-                    {tag.tagName}
-                  </span>
-                ))}
-              </div>
+              {annotation.tags.length > 0 && (
+                <div className="flex flex-wrap items-center text-text-light text-sm mb-1">
+                  <span className="mr-2">Tags:</span>
+                  {annotation.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="ml-2 px-2 py-1 bg-gray-200 rounded"
+                    >
+                      {tag.tagName}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p className="text-text-light text-sm">
                 Diverifikasi oleh {annotation.ownerUserId}
               </p>

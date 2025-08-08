@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getDocuments } from "../api";
 import type { Document } from "../types/document";
 import { useNavigate } from "react-router-dom";
+import VersionButton from "../components/VersionButton";
 import { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
@@ -65,17 +66,12 @@ const ArsipPage: React.FC = () => {
             </span>
             <div className="flex flex-col items-end">
               <span className="text-lg font-normal text-text-light">
-                Version {document.version + 1}.{document.subversion}
+                Version {document.version + 1}.{document.subversion || 0}
               </span>
-              <button
-                onClick={() => {}}
-                className="mt-2 px-4 py-2 bg-accent text-white rounded-md hover:bg-button-highlight-blue text-sm"
-              >
-                Lihat Versi
-              </button>
+              <VersionButton document={document} />
             </div>
           </h2>
-          <p className="text-text-main mb-4">
+          <p className="text-text-main mb-4 mt-4">
             {document.content.length > 250
               ? `${document.content.substring(0, 250)}...`
               : document.content}
@@ -86,13 +82,15 @@ const ArsipPage: React.FC = () => {
                 Tags:{" "}
                 {(() => {
                   const uniqueTagsMap = new Map<string, string>(); // Map: lowercaseTagName -> originalTagName
-                  document.tags.forEach(tag => {
+                  document.tags.forEach((tag) => {
                     const lowerCaseTagName = tag.tagName.toLowerCase();
                     if (!uniqueTagsMap.has(lowerCaseTagName)) {
                       uniqueTagsMap.set(lowerCaseTagName, tag.tagName);
                     }
                   });
-                  const uniqueTagNamesToDisplay = Array.from(uniqueTagsMap.values());
+                  const uniqueTagNamesToDisplay = Array.from(
+                    uniqueTagsMap.values()
+                  );
                   return uniqueTagNamesToDisplay.map((tagName) => (
                     <span
                       key={tagName} // Use tagName as key for uniqueness

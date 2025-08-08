@@ -71,12 +71,13 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const handleSearch = () => {
     dispatch(setSearchTerm(inputValue));
     navigate("/arsip");
+    toggleMobileMenu(); // Use toggleMobileMenu to ensure consistency
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      handleSearch();
       setDropdownOpen(false);
+      handleSearch();
     }
   };
 
@@ -135,7 +136,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             <button
               type="button"
               onClick={handleSearch}
-              className="text-gray-400 hover:text-gray-700"
+              className="relative text-gray-400 hover:text-gray-700 left-8"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -435,7 +436,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             {inputValue && (
               <button
                 type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-700"
                 onClick={handleClearSearch}
               >
                 <svg
@@ -457,8 +458,8 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             <button
               type="button"
               onClick={() => {
+                setMobileMenuOpen(false);
                 handleSearch();
-                toggleMobileMenu();
               }}
               className="relative text-gray-400 hover:text-gray-700 left-8"
             >

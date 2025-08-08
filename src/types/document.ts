@@ -41,3 +41,9 @@ export interface RelatedDocument extends Document {
   verifiedBy: string;
   tags: Tag[];
 }
+
+export interface Version {
+  id: number;
+  version: number;
+  subversion: number;
+}

@@ -1,5 +1,4 @@
 import React from "react";
-import type { NavbarLoggedInProps } from "../../types/navbar";
 import { Link } from "react-router-dom";
 
 interface MobileLoggedInNavProps {
@@ -8,7 +7,7 @@ interface MobileLoggedInNavProps {
   onLogout: () => void;
 }
 
-const MobileLoggedInNav: React.FC<MobileLoggedInNavProps> = ({ mobileMenuOpen, toggleMobileMenu, onLogout }) => {
+const MobileLoggedInNav: React.FC<MobileLoggedInNavProps> = ({ toggleMobileMenu, onLogout }) => {
   return (
     <div className="md:hidden bg-link-nav fixed top-0 left-0 w-full h-screen z-50">
       <div className="flex flex-col items-center space-y-4 p-4">

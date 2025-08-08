@@ -89,7 +89,7 @@ export const createDocument = (data: {
 };
 
 export const getRelatedDocuments = (documentId: number) => {
-  return api.get(`/public/document/${documentId}`, {
+  return api.get(`/public/document/related/${documentId}`, {
     headers: getAuthHeaders(),
   });
 };

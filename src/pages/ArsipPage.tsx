@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getDocuments } from "../api";
 import type { Document } from "../types/document";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
 import type { RootState } from "../store";
@@ -25,7 +26,13 @@ const ArsipPage: React.FC = () => {
         setDocuments(response.data.data.content);
         setTotalPages(response.data.data.total_pages);
       } catch (error) {
-        console.error("Error fetching documents:", error);
+        const axiosError = error as AxiosError;
+        if (axiosError.response && axiosError.response.status === 400) {
+          setDocuments([]);
+          setTotalPages(0);
+        } else {
+          console.error("Error fetching documents:", error);
+        }
       } finally {
         dispatch(hideModal());
       }
@@ -63,7 +70,11 @@ const ArsipPage: React.FC = () => {
               </button>
             </div>
           </h2>
-          <p className="text-text-main mb-4">{document.content}</p>
+          <p className="text-text-main mb-4">
+            {document.content.length > 100
+              ? `${document.content.substring(0, 100)}...`
+              : document.content}
+          </p>
           <div className="mb-4">
             {document.tags && document.tags.length > 0 ? (
               <span className="font-semibold text-text-main">
@@ -92,6 +103,12 @@ const ArsipPage: React.FC = () => {
           </div>
         </div>
       ))}
+
+      {documents.length === 0 && (
+        <div className="text-center text-gray-500 mt-8">
+          Belum ada arsip ditemukan.
+        </div>
+      )}
 
       {documents.length > 0 && (
         <div className="flex justify-center mt-8 space-x-2">

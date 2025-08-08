@@ -52,7 +52,10 @@ export const getDocumentById = (id: number) => {
 };
 
 export const getProfile = () => {
-  return api.get("/profile", { headers: getAuthHeaders() });
+  return api.get("/profile", { headers: getAuthHeaders() }).then(response => {
+    console.log("API - getProfile response data:", response.data);
+    return response;
+  });
 };
 
 export const updateProfile = (data: {

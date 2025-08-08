@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showModal } from "../store/modalSlice";
+import { setUser } from "../store/userSlice";
 
 interface ErrorType {
   [key: string]: string;
@@ -42,6 +43,7 @@ const LoginPage: React.FC = () => {
           })
         );
         localStorage.setItem("token", data.data.token);
+        dispatch(setUser({ username: data.data.username })); // Dispatch setUser with the actual username
         navigate("/dashboard");
       } else {
         if (data.data && Array.isArray(data.data)) {

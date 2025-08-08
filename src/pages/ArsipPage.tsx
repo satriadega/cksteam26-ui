@@ -84,14 +84,24 @@ const ArsipPage: React.FC = () => {
             {document.tags && document.tags.length > 0 ? (
               <span className="font-semibold text-text-main">
                 Tags:{" "}
-                {document.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="ml-2 px-2 py-1 bg-secondary text-text-main text-sm rounded-full"
-                  >
-                    {tag.tagName}
-                  </span>
-                ))}
+                {(() => {
+                  const uniqueTagsMap = new Map<string, string>(); // Map: lowercaseTagName -> originalTagName
+                  document.tags.forEach(tag => {
+                    const lowerCaseTagName = tag.tagName.toLowerCase();
+                    if (!uniqueTagsMap.has(lowerCaseTagName)) {
+                      uniqueTagsMap.set(lowerCaseTagName, tag.tagName);
+                    }
+                  });
+                  const uniqueTagNamesToDisplay = Array.from(uniqueTagsMap.values());
+                  return uniqueTagNamesToDisplay.map((tagName) => (
+                    <span
+                      key={tagName} // Use tagName as key for uniqueness
+                      className="inline-block mr-2 px-2 py-1 bg-secondary text-text-main text-sm rounded-full"
+                    >
+                      {tagName}
+                    </span>
+                  ));
+                })()}
               </span>
             ) : (
               <span className="font-semibold text-text-main">

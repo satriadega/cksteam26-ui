@@ -76,6 +76,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       handleSearch();
+      setDropdownOpen(false);
     }
   };
 

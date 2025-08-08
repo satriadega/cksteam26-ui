@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getDocumentById,
-  createAnnotation,
-} from "../api";
+import { getDocumentById, createAnnotation } from "../api";
 import { useSearchParams } from "react-router-dom";
 import type { Document, Annotation } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
@@ -202,7 +199,7 @@ const TambahPengetahuanPage: React.FC = () => {
       </div>
 
       <div
-        className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap"
+        className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap overflow-y-auto h-[40vh] mt-6"
         ref={contentRef}
         id="document-content"
       >
@@ -295,19 +292,6 @@ const TambahPengetahuanPage: React.FC = () => {
         </div>
       ) : (
         <p className="text-text-main">Belum memiliki pengetahuan.</p>
-      )}
-
-      <h2 className="text-3xl font-bold mb-6 mt-8">Tags</h2>
-      {currentDocument?.tags && currentDocument.tags.length > 0 ? (
-        <div className="flex flex-wrap">
-          {currentDocument.tags.map((tag) => (
-            <span key={tag.id} className="ml-2 px-2 py-1 bg-gray-200 rounded">
-              {tag.tagName}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <p className="text-text-main">Belum ada tags untuk dokumen ini.</p>
       )}
     </div>
   );

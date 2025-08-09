@@ -1,58 +1,105 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { createDocument } from "../api";
+import { createDocument, getDocumentById } from "../api";
 import { showModal } from "../store/modalSlice";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import type { Document } from "../types/document";
 
 const BuatArsipPage: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [title, setTitle] = useState("");
-  const [visibility, setVisibility] = useState("Publik");
-  const [content, setContent] = useState("");
+  const [searchParams] = useSearchParams();
+  const documentIdParam = searchParams.get("documentId");
+  const documentId = documentIdParam ? Number(documentIdParam) : null;
 
-  const handlePublish = async () => {
-    let publicVisibility = false;
-    let isPrivate = false;
+  const [version, setVersion] = useState<number>(1);
+  const [subversion, setSubversion] = useState<number>(0);
+  const [title, setTitle] = useState<string>("");
+  const [visibility, setVisibility] = useState<string>("Publik");
+  const [content, setContent] = useState<string>("");
 
-    if (visibility === "Publik") {
-      publicVisibility = true;
-      isPrivate = false;
-    } else if (visibility === "Pribadi") {
-      publicVisibility = false;
-      isPrivate = true;
-    } else if (visibility === "Organisasi") {
-      publicVisibility = false;
-      isPrivate = false;
+  const [referenceDocumentId, setReferenceDocumentId] = useState<number | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (documentId) {
+      getDocumentById(documentId).then((res) => {
+        const doc = res.data;
+        setTitle(doc.title);
+        setContent(doc.content);
+        setVersion(doc.version || 0);
+        setSubversion(doc.subversion || 0);
+        setReferenceDocumentId(doc.referenceDocumentId ?? null);
+        if (doc.publicVisibility && !doc.isPrivate) setVisibility("Publik");
+        else if (!doc.publicVisibility && doc.isPrivate)
+          setVisibility("Pribadi");
+        else setVisibility("Organisasi");
+      });
     }
+  }, [documentId]);
 
-    const documentData = {
-      title,
-      content,
-      publicVisibility,
-      referenceDocumentId: null,
-      version: 0,
-      subversion: 0,
-      private: isPrivate,
-    };
+  const mapVisibility = (value: string) => {
+    if (value === "Publik") return { publicVisibility: true, private: false };
+    if (value === "Pribadi") return { publicVisibility: false, private: true };
+    return { publicVisibility: false, private: false };
+  };
 
-    try {
-      const response = await createDocument(documentData);
-      const documentId = response.data.documentId;
+  const handleCreateMajorVersion = async () => {
+    const newVersion = version + 1;
+    setVersion(newVersion);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    handlePublish(newVersion, 0);
+  };
+
+  const handleCreateMinorVersion = async () => {
+    const newSubversion = subversion + 1;
+    setSubversion(newSubversion);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    handlePublish(version, newSubversion);
+  };
+
+  const handlePublish = async (ver = version, subver = subversion) => {
+    if (title && content) {
+      const { publicVisibility, private: isPrivate } =
+        mapVisibility(visibility);
+      const document: Document = {
+        id: 0,
+        name: "",
+        createdAt: "",
+        tags: null,
+        annotationCount: null,
+        annotations: null,
+        username: "",
+        isAnnotable: false,
+        title,
+        content,
+        publicVisibility,
+        referenceDocumentId,
+        version: ver,
+        subversion: subver,
+        private: isPrivate,
+      };
+      const res = await createDocument(document);
+      if (res && res.data && res.data.documentId) {
+        dispatch(
+          showModal({
+            type: "success",
+            message: "Document published successfully!",
+          })
+        );
+        navigate(`/tambah-pengetahuan?documentId=${res.data.documentId}`);
+      } else {
+        dispatch(
+          showModal({
+            type: "error",
+            message: "Failed to get new document ID!",
+          })
+        );
+      }
+    } else {
       dispatch(
-        showModal({
-          type: "success",
-          message: `Arsip berhasil dibuat!`,
-          onConfirm: () => {
-            window.location.href = `/tambah-pengetahuan?documentId=${documentId}`;
-          },
-        })
-      );
-    } catch (error) {
-      console.error("Gagal membuat arsip:", error);
-      dispatch(
-        showModal({
-          type: "error",
-          message: "Gagal membuat arsip. Silakan coba lagi.",
-        })
+        showModal({ type: "error", message: "Title and content are required!" })
       );
     }
   };
@@ -66,9 +113,7 @@ const BuatArsipPage: React.FC = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handlePublish();
-          }
+          if (e.key === "Enter") handlePublish();
         }}
       />
 
@@ -91,14 +136,31 @@ const BuatArsipPage: React.FC = () => {
         onChange={(e) => setContent(e.target.value)}
       ></textarea>
 
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={handlePublish}
-          className="bg-accent hover:bg-button-highlight-blue text-white font-bold py-2 px-4 rounded"
-        >
-          Publikasikan
-        </button>
-      </div>
+      {documentId ? (
+        <div className="flex justify-end space-x-4 mb-4">
+          <button
+            onClick={handleCreateMajorVersion}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Buat Versi Major
+          </button>
+          <button
+            onClick={handleCreateMinorVersion}
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Buat Versi Minor
+          </button>
+        </div>
+      ) : (
+        <div className="flex justify-end space-x-4">
+          <button
+            onClick={() => handlePublish()}
+            className="bg-accent hover:bg-button-highlight-blue text-white font-bold py-2 px-4 rounded"
+          >
+            Publikasikan
+          </button>
+        </div>
+      )}
     </div>
   );
 };

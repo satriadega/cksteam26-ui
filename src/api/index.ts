@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.data?.error_code === "X01001")) {
       clearAuth();
       window.location.href = "/login";
     }

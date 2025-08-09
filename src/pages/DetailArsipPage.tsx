@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getDocumentById, getProfile, getRelatedDocuments } from "../api";
 import type { Document, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
-import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import { FaSpinner } from "react-icons/fa";
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -15,18 +15,23 @@ const formatDate = (dateString: string): string => {
   const todayForComparison = new Date(today);
   todayForComparison.setHours(0, 0, 0, 0);
   const options: Intl.DateTimeFormatOptions = {
-    timeZone: 'Asia/Jakarta',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
   };
-  const formatter = new Intl.DateTimeFormat('id-ID', options);
-  const diffDays = Math.floor((todayForComparison.getTime() - dateForComparison.getTime()) / (1000 * 60 * 60 * 24));
-  return diffDays === 0 ? `Hari ini, ${formatter.format(date)}` : `${diffDays} hari yang lalu, ${formatter.format(date)}`;
+  const formatter = new Intl.DateTimeFormat("id-ID", options);
+  const diffDays = Math.floor(
+    (todayForComparison.getTime() - dateForComparison.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+  return diffDays === 0
+    ? `Hari ini, ${formatter.format(date)}`
+    : `${diffDays} hari yang lalu, ${formatter.format(date)}`;
 };
 
 const DetailArsipPage: React.FC = () => {
@@ -36,17 +41,12 @@ const DetailArsipPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState({ username: "" });
   const [versions, setVersions] = useState<Version[]>([]);
   const [showVersions, setShowVersions] = useState(false);
+  const [isLoadingVersions, setIsLoadingVersions] = useState(false);
   const { isAuthenticated, username: reduxUsername } = useSelector(
     (state: RootState) => state.user
   );
 
   useEffect(() => {
-    console.log(
-      "DetailArsipPage - isAuthenticated from Redux:",
-      isAuthenticated
-    );
-    console.log("DetailArsipPage - Redux username:", reduxUsername);
-
     const fetchData = async () => {
       if (id) {
         dispatch(showModal({ type: "loading", message: "Memuat dokumen..." }));
@@ -63,28 +63,19 @@ const DetailArsipPage: React.FC = () => {
               profileResponse.data.data.length > 0
             ) {
               const fetchedUsername =
-                profileResponse.data.data[0].username || ""; // Ensure username is not null/undefined
+                profileResponse.data.data[0].username || "";
               setUserProfile({ username: fetchedUsername });
-              console.log("DetailArsipPage - userProfile after fetch:", {
-                username: fetchedUsername,
-              });
             } else {
-              console.warn("DetailArsipPage - No user profile data found.");
-              setUserProfile({ username: "" }); // Reset to default if no data
+              setUserProfile({ username: "" });
             }
-          } else {
-            console.log(
-              "DetailArsipPage - User not authenticated, skipping profile fetch."
-            );
           }
 
           dispatch(hideModal());
         } catch (error) {
-          console.error("Error fetching document or related documents:", error);
           dispatch(
             showModal({
               type: "error",
-              message: "Gagal memuat dokumen. Silakan coba lagi.",
+              message: "Gagal memuat dokumen. Silakan coba lagi. " + error,
             })
           );
         }
@@ -92,52 +83,45 @@ const DetailArsipPage: React.FC = () => {
     };
 
     fetchData();
-  }, [id, dispatch, isAuthenticated, reduxUsername]); // Add reduxUsername to dependencies
-
-  useEffect(() => {
-    console.log("DetailArsipPage - Current userProfile state:", userProfile);
-    if (document) {
-      console.log("DetailArsipPage - Document username:", document.username);
-      console.log(
-        "DetailArsipPage - Comparison:",
-        userProfile.username === document.username
-      );
-    }
-  }, [userProfile, document]);
+  }, [id, dispatch, isAuthenticated, reduxUsername]);
 
   const handleShowVersions = async () => {
-    if (document && document.referenceDocumentId) {
-      try {
-        const response = await getRelatedDocuments(
-          document.referenceDocumentId
+    if (!document || !document.referenceDocumentId) return;
+
+    setIsLoadingVersions(true);
+
+    try {
+      const response = await getRelatedDocuments(document.referenceDocumentId);
+      if (response.data.data.length === 0) {
+        dispatch(
+          showModal({
+            type: "info",
+            message: "Belum ada versi lain.",
+          })
         );
-        if (response.data.data.length === 0) {
-          dispatch(
-            showModal({
-              type: "info",
-              message: "Belum ada versi lain.",
-            })
-          );
-        } else {
-          setVersions(response.data.data);
-          setShowVersions(!showVersions);
-        }
-      } catch (error) {
-        console.error("Error fetching related documents:", error);
+        setShowVersions(false);
+      } else {
+        setVersions(response.data.data);
+        setShowVersions(true);
       }
+    } catch (error) {
+      dispatch(
+        showModal({
+          type: "error",
+          message: "Gagal memuat versi. Silakan coba lagi. " + error,
+        })
+      );
+      setShowVersions(false);
+    } finally {
+      setIsLoadingVersions(false);
     }
   };
 
-  if (!document) {
-    return null;
-  }
+  const handleVersionClick = () => {
+    setShowVersions(false);
+  };
 
-  console.log(
-    "Render check:",
-    isAuthenticated,
-    userProfile.username,
-    document.username
-  );
+  if (!document) return null;
 
   return (
     <div className="container mx-auto p-4 mt-8 mb-8 border rounded-lg">
@@ -155,11 +139,17 @@ const DetailArsipPage: React.FC = () => {
         <p className="text-text-main text-sm mb-2">
           Version {document.version + 1}.{document.subversion || 0}
         </p>
-        <div className="relative">
+        <div className="relative inline-block">
           <button
             onClick={handleShowVersions}
-            className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+            disabled={isLoadingVersions}
+            className={`bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded flex items-center justify-center ${
+              isLoadingVersions ? "cursor-not-allowed opacity-60" : ""
+            }`}
           >
+            {isLoadingVersions ? (
+              <FaSpinner className="animate-spin mr-2" />
+            ) : null}
             Lihat Versi
           </button>
           {showVersions && (
@@ -170,7 +160,10 @@ const DetailArsipPage: React.FC = () => {
                     key={version.id}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
                   >
-                    <Link to={`/arsip/${version.id}`}>
+                    <Link
+                      to={`/arsip/${version.id}`}
+                      onClick={handleVersionClick}
+                    >
                       Version {version.version + 1}.{version.subversion || 0}
                     </Link>
                   </li>
@@ -192,14 +185,20 @@ const DetailArsipPage: React.FC = () => {
         {isAuthenticated ? (
           userProfile.username === document.username ? (
             <>
-              <Link to={`/tambah-pengetahuan?documentId=${id}`}>
-                <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                  Tambahkan Pengetahuan
-                </button>
-              </Link>
-              <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                Tambahkan versi
-              </button>
+              {document.isAnnotable && (
+                <>
+                  <Link to={`/tambah-pengetahuan?documentId=${id}`}>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                      Tambahkan Pengetahuan
+                    </button>
+                  </Link>
+                  <Link to={`/buat-arsip?documentId=${id}`}>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                      Tambahkan Versi
+                    </button>
+                  </Link>
+                </>
+              )}
             </>
           ) : (
             <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
@@ -214,12 +213,7 @@ const DetailArsipPage: React.FC = () => {
         <div className="flex flex-wrap">
           {(() => {
             const allTags = document.annotations.flatMap((a) => a.tags);
-            console.log(
-              "DetailArsipPage - All raw tags:",
-              allTags.map((tag) => tag.tagName)
-            ); // Log raw tag names
-
-            const uniqueTagsMap = new Map<string, string>(); // Map: lowercaseTagName -> originalTagName
+            const uniqueTagsMap = new Map<string, string>();
             allTags.forEach((tag) => {
               const lowerCaseTagName = tag.tagName.toLowerCase();
               if (!uniqueTagsMap.has(lowerCaseTagName)) {
@@ -227,10 +221,6 @@ const DetailArsipPage: React.FC = () => {
               }
             });
             const uniqueTagNamesToDisplay = Array.from(uniqueTagsMap.values());
-            console.log(
-              "DetailArsipPage - Unique Tag Names to Display (after deduplication):",
-              uniqueTagNamesToDisplay
-            );
             return uniqueTagNamesToDisplay.map((tagName) => (
               <span
                 key={tagName}
@@ -254,7 +244,10 @@ const DetailArsipPage: React.FC = () => {
                 {index + 1}. {annotation.selectedText}
               </h3>
               <p className="text-text-main text-sm mb-1">
-                Description: {annotation.description}
+                Deskripsi: {annotation.description}
+              </p>
+              <p className="text-text-light text-sm mb-1">
+                Dibuat pada {formatDate(annotation.createdAt)}
               </p>
               {annotation.tags.length > 0 && (
                 <div className="flex flex-wrap items-center text-text-light text-sm mb-1">
@@ -269,9 +262,6 @@ const DetailArsipPage: React.FC = () => {
                   ))}
                 </div>
               )}
-              <p className="text-text-light text-sm">
-                Diverifikasi oleh {annotation.ownerUserId}
-              </p>
             </div>
           ))}
         </div>

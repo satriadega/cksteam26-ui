@@ -17,6 +17,7 @@ export interface Annotation {
   tags: Tag[];
   verified: boolean;
   verifiedBy: string; // Added verifiedBy property based on usage in TambahPengetahuanPage.tsx
+  createdAt: string; // Added createdAt property
 }
 
 export interface Document {
@@ -34,6 +35,7 @@ export interface Document {
   annotationCount: number | null;
   annotations: Annotation[] | null;
   username: string;
+  isAnnotable: boolean;
 }
 
 export interface RelatedDocument extends Document {

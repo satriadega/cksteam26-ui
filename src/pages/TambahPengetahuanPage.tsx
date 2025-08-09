@@ -386,7 +386,10 @@ const TambahPengetahuanPage: React.FC = () => {
                 {index + 1}. {item.selectedText}
               </h3>
               <p className="text-text-main text-sm mb-1">
-                Description: {item.description}
+                Deskripsi: {item.description}
+              </p>
+              <p className="text-text-light text-sm mb-1">
+                Dibuat {formatDate(item.createdAt)}
               </p>
               {item.tags.length > 0 && (
                 <div className="flex flex-wrap items-center text-text-light text-sm mb-1">

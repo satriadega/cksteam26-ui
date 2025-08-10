@@ -174,10 +174,10 @@ const DetailArsipPage: React.FC = () => {
         </div>
       </div>
 
-      <div
-        className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap mt-6 overflow-y-scroll h-[40vh]"
-        id="document-content"
-      >
+<div
+  className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap mt-6 overflow-y-scroll h-[40vh] whitespace-nowrap"
+  id="document-content"
+>
         {document.content}
       </div>
 

@@ -120,3 +120,22 @@ export const createAnnotation = (data: {
   };
   return api.post("/annotation", data, { headers });
 };
+
+export const getAnnotations = (
+  page = 0,
+  searchTerm = "",
+  sort = "asc",
+  sortBy = "id",
+  column = "selectedText"
+) => {
+  const params: { column?: string; value?: string } = {};
+  if (searchTerm?.trim()) {
+    params.column = column;
+    params.value = searchTerm.trim();
+  }
+
+  return api.get(`/annotation/${sort}/${sortBy}/${page}`, {
+    headers: getAuthHeaders(),
+    params,
+  });
+};

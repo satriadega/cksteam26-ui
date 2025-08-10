@@ -140,37 +140,44 @@ const TambahPengetahuanPage: React.FC = () => {
       const customError = error as CustomError;
       if (customError instanceof Error) {
         console.error("Error creating annotation:", customError.message);
-        if (customError.response && customError.response.data) {
-          const errorData = customError.response.data;
-          if (errorData.data && Array.isArray(errorData.data)) {
-            errorData.data.forEach(
-              (err: { field: string; message: string }) => {
-                dispatch(
-                  showModal({
-                    type: "error",
-                    message: `Error in ${err.field}: ${err.message}`,
-                  })
-                );
-              }
-            );
-          } else {
-            dispatch(
-              showModal({
-                type: "error",
-                message:
-                  errorData.message ||
-                  "Gagal membuat anotasi. Silakan coba lagi.",
-              })
-            );
-          }
-        } else {
-          dispatch(
-            showModal({
-              type: "error",
-              message: "Gagal membuat anotasi. Silakan coba lagi.",
-            })
-          );
-        }
+if (customError.response && customError.response.data) {
+  const errorData = customError.response.data;
+  if (errorData.data && Array.isArray(errorData.data)) {
+    errorData.data.forEach(
+      (err: { field: string; message: string }) => {
+        dispatch(
+          showModal({
+            type: "error",
+            message: `Error in ${err.field}: ${err.message}`,
+          })
+        );
+      }
+    );
+  } else if (errorData.message && errorData.message.includes("Authentication")) {
+    dispatch(
+      showModal({
+        type: "error",
+        message: "Authentication error. Please log in again.",
+      })
+    );
+  } else {
+    dispatch(
+      showModal({
+        type: "error",
+        message:
+          errorData.message ||
+          "Gagal membuat anotasi. Silakan coba lagi.",
+      })
+    );
+  }
+} else {
+  dispatch(
+    showModal({
+      type: "error",
+      message: "Gagal membuat anotasi. Silakan coba lagi.",
+    })
+  );
+}
       } else {
         console.error("Unknown error creating annotation:", customError);
         dispatch(

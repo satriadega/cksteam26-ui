@@ -155,23 +155,17 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             </button>
           </div>
           <div className="flex items-center space-x-8 mr-8">
-            <Link
-              to="/buat-arsip"
-              className="text-white hover:text-text-main mr-4"
-            >
+            <Link to="/buat-arsip" className="text-white hover:text-text-main ">
               Buat arsip
             </Link>
             <Link
               to="/arsip"
-              className="text-white hover:text-text-main mr-4"
+              className="text-white hover:text-text-main "
               onClick={handleClearSearch}
             >
               List Arsip
             </Link>
-            <Link
-              to="/dashboard"
-              className="text-white hover:text-text-main mr-4"
-            >
+            <Link to="/dashboard" className="text-white hover:text-text-main ">
               Dashboard
             </Link>
 

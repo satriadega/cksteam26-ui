@@ -71,7 +71,10 @@ const ArsipPage: React.FC = () => {
               <VersionButton document={document} />
             </div>
           </h2>
-          <p className="text-text-main mb-4 mt-4">
+          <p
+            className="text-text-main mb-4 mt-4 whitespace-normal "
+            style={{ wordWrap: "break-word" }}
+          >
             {document.content.length > 250
               ? `${document.content.substring(0, 250)}...`
               : document.content}

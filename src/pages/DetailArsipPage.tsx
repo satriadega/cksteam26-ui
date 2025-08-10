@@ -137,7 +137,7 @@ const DetailArsipPage: React.FC = () => {
       </div>
       <div className="text-right">
         <p className="text-text-main text-sm mb-2">
-          Version {document.version + 1}.{document.subversion || 0}
+          Version {document.version}.{document.subversion || 0}
         </p>
         <div className="relative inline-block">
           <button
@@ -164,7 +164,7 @@ const DetailArsipPage: React.FC = () => {
                       to={`/arsip/${version.id}`}
                       onClick={handleVersionClick}
                     >
-                      Version {version.version + 1}.{version.subversion || 0}
+                      Version {version.version}.{version.subversion || 0}
                     </Link>
                   </li>
                 ))}

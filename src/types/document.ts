@@ -36,6 +36,7 @@ export interface Document {
   annotations: Annotation[] | null;
   username: string;
   isAnnotable: boolean;
+  isVerifiedAll: boolean;
 }
 
 export interface RelatedDocument extends Document {

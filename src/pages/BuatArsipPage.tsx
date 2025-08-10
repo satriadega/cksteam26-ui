@@ -72,6 +72,7 @@ const BuatArsipPage: React.FC = () => {
         annotations: null,
         username: "",
         isAnnotable: false,
+        isVerifiedAll: false,
         title,
         content,
         publicVisibility,

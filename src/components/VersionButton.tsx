@@ -57,7 +57,7 @@ const VersionButton: React.FC<VersionButtonProps> = ({ document }) => {
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
               >
                 <Link to={`/arsip/${version.id}`}>
-                  Version {version.version + 1}.{version.subversion || 0}
+                  Version {version.version}.{version.subversion || 0}
                 </Link>
               </li>
             ))}

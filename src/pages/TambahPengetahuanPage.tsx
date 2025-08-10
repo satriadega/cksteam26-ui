@@ -287,7 +287,7 @@ const TambahPengetahuanPage: React.FC = () => {
       </div>
       <div className="text-right">
         <p className="text-text-main text-sm mb-2">
-          Version {currentDocument.version + 1}.{currentDocument.subversion}
+          Version {currentDocument.version}.{currentDocument.subversion}
         </p>
         <div className="relative">
           <button
@@ -305,7 +305,7 @@ const TambahPengetahuanPage: React.FC = () => {
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
                   >
                     <Link to={`/arsip/${version.id}`}>
-                      Version {version.version + 1}.{version.subversion || 0}
+                      Version {version.version}.{version.subversion || 0}
                     </Link>
                   </li>
                 ))}

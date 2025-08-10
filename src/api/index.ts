@@ -32,13 +32,19 @@ const getAuthHeaders = (): AxiosRequestConfig["headers"] => {
   return headers;
 };
 
-export const getDocuments = (page = 0, searchTerm = "") => {
-  const params: { page: number; keyword?: string } = { page };
+export const getDocuments = (
+  page = 0,
+  searchTerm = "",
+  sort = "asc",
+  sortBy = "id"
+) => {
+  const params: { column?: string; value?: string } = {};
   if (searchTerm?.trim()) {
-    params.keyword = searchTerm.trim();
+    params.column = "title";
+    params.value = searchTerm.trim();
   }
 
-  return api.get("/public/document", {
+  return api.get(`/document/${sort}/${sortBy}/${page}`, {
     headers: getAuthHeaders(),
     params,
   });

@@ -66,7 +66,7 @@ const ArsipPage: React.FC = () => {
             </span>
             <div className="flex flex-col items-end">
               <span className="text-lg font-normal text-text-light">
-                Version {document.version + 1}.{document.subversion || 0}
+                Version {document.version}.{document.subversion || 0}
               </span>
               <VersionButton document={document} />
             </div>

@@ -309,9 +309,12 @@ if (customError.response && customError.response.data) {
                 {versions.map((version) => (
                   <li
                     key={version.id}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
+                    className="hover:bg-gray-100 cursor-pointer text-sm font-normal"
                   >
-                    <Link to={`/arsip/${version.id}`}>
+                    <Link
+                      to={`/arsip/${version.id}`}
+                      className="block px-4 py-2"
+                    >
                       Version {version.version}.{version.subversion || 0}
                     </Link>
                   </li>

@@ -15,6 +15,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] =
     useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [notificationType, setNotificationType] = useState(0); // Add new state for notification type
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -26,8 +27,9 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
       try {
         const response = await getProfile();
         setNotificationCount(response.data.data[0].notificationCounter);
+        setNotificationType(response.data.data[0].notificationType); // Set notification type
       } catch (error) {
-        console.error("Failed to fetch notification count:", error);
+        console.error("Failed to fetch notification count or type:", error);
       }
     };
 
@@ -197,17 +199,45 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
                     <Link
                       to="/list-verifier"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                       onClick={() => setNotificationDropdownOpen(false)}
                     >
                       List Verifier
+                      {(notificationType === 2 || notificationType === 3) && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-red-500 ml-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
                     </Link>
                     <Link
                       to="/list-appliance"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                       onClick={() => setNotificationDropdownOpen(false)}
                     >
                       List Appliance
+                      {(notificationType === 1 || notificationType === 3) && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-red-500 ml-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
                     </Link>
                   </div>
                 )}
@@ -328,23 +358,51 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   <div className="absolute left-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
                     <Link
                       to="/list-verifier"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                       onClick={() => {
                         setNotificationDropdownOpen(false);
                         toggleMobileMenu();
                       }}
                     >
                       List Verifier
+                      {(notificationType === 2 || notificationType === 3) && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-red-500 ml-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
                     </Link>
                     <Link
                       to="/list-appliance"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                       onClick={() => {
                         setNotificationDropdownOpen(false);
                         toggleMobileMenu();
                       }}
                     >
                       List Appliance
+                      {(notificationType === 1 || notificationType === 3) && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-red-500 ml-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
                     </Link>
                   </div>
                 )}

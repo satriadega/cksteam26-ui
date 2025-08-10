@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getDocumentById, getProfile, getRelatedDocuments } from "../api";
+import {
+  getDocumentById,
+  getProfile,
+  getRelatedDocuments,
+  checkVerifierStatus,
+  registerAsVerifier,
+} from "../api";
 import type { Document, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
+import { AxiosError } from "axios";
 import type { RootState } from "../store";
-import { FaSpinner } from "react-icons/fa";
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -41,10 +47,11 @@ const DetailArsipPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState({ username: "" });
   const [versions, setVersions] = useState<Version[]>([]);
   const [showVersions, setShowVersions] = useState(false);
-  const [isLoadingVersions, setIsLoadingVersions] = useState(false);
+  const [showVerifierButton, setShowVerifierButton] = useState(false);
   const { isAuthenticated, username: reduxUsername } = useSelector(
     (state: RootState) => state.user
   );
+  const versionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +61,15 @@ const DetailArsipPage: React.FC = () => {
           const documentId = parseInt(id, 10);
           const docResponse = await getDocumentById(documentId);
           setDocument(docResponse.data);
+
+          try {
+            await checkVerifierStatus(documentId);
+          } catch (error) {
+            const axiosError = error as AxiosError;
+            if (axiosError.response && axiosError.response.status === 400) {
+              setShowVerifierButton(true);
+            }
+          }
 
           if (isAuthenticated) {
             const profileResponse = await getProfile();
@@ -85,13 +101,30 @@ const DetailArsipPage: React.FC = () => {
     fetchData();
   }, [id, dispatch, isAuthenticated, reduxUsername]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        versionsRef.current &&
+        !versionsRef.current.contains(event.target as Node)
+      ) {
+        setShowVersions(false);
+      }
+    };
+
+    window.document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      window.document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [versionsRef]);
+
   const handleShowVersions = async () => {
     if (!document || !document.referenceDocumentId) return;
 
-    setIsLoadingVersions(true);
+    dispatch(showModal({ type: "loading", message: "Memuat versi..." }));
 
     try {
       const response = await getRelatedDocuments(document.referenceDocumentId);
+      dispatch(hideModal());
       if (response.data.data.length === 0) {
         dispatch(
           showModal({
@@ -105,6 +138,7 @@ const DetailArsipPage: React.FC = () => {
         setShowVersions(true);
       }
     } catch (error) {
+      dispatch(hideModal());
       dispatch(
         showModal({
           type: "error",
@@ -112,13 +146,47 @@ const DetailArsipPage: React.FC = () => {
         })
       );
       setShowVersions(false);
-    } finally {
-      setIsLoadingVersions(false);
     }
   };
 
-  const handleVersionClick = () => {
-    setShowVersions(false);
+  const handleVersionClick = (versionId: number) => {
+    if (document && document.id === versionId) {
+      setShowVersions(false);
+    } else {
+      dispatch(showModal({ type: "loading", message: "Memuat versi..." }));
+      setShowVersions(false);
+    }
+  };
+
+  const handleRegisterVerifier = async () => {
+    if (id) {
+      dispatch(
+        showModal({
+          type: "loading",
+          message: "Mendaftarkan sebagai verifier...",
+        })
+      );
+      try {
+        if (document?.referenceDocumentId) {
+          await registerAsVerifier(parseInt(id, 10));
+          dispatch(
+            showModal({
+              type: "success",
+              message: "Berhasil mendaftar sebagai verifier.",
+            })
+          );
+          setShowVerifierButton(false);
+        }
+      } catch (error) {
+        dispatch(
+          showModal({
+            type: "error",
+            message:
+              "Gagal mendaftar sebagai verifier. Silakan coba lagi. " + error,
+          })
+        );
+      }
+    }
   };
 
   if (!document) return null;
@@ -139,17 +207,11 @@ const DetailArsipPage: React.FC = () => {
         <p className="text-text-main text-sm mb-2">
           Version {document.version}.{document.subversion || 0}
         </p>
-        <div className="relative inline-block">
+        <div className="relative inline-block" ref={versionsRef}>
           <button
             onClick={handleShowVersions}
-            disabled={isLoadingVersions}
-            className={`bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded flex items-center justify-center ${
-              isLoadingVersions ? "cursor-not-allowed opacity-60" : ""
-            }`}
+            className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
           >
-            {isLoadingVersions ? (
-              <FaSpinner className="animate-spin mr-2" />
-            ) : null}
             Lihat Versi
           </button>
           {showVersions && (
@@ -158,11 +220,12 @@ const DetailArsipPage: React.FC = () => {
                 {versions.map((version) => (
                   <li
                     key={version.id}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm font-normal"
+                    className="hover:bg-gray-100 cursor-pointer text-sm font-normal"
                   >
                     <Link
                       to={`/arsip/${version.id}`}
-                      onClick={handleVersionClick}
+                      onClick={() => handleVersionClick(version.id)}
+                      className="block px-4 py-2"
                     >
                       Version {version.version}.{version.subversion || 0}
                     </Link>
@@ -174,38 +237,46 @@ const DetailArsipPage: React.FC = () => {
         </div>
       </div>
 
-<div
-  className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap mt-6 overflow-y-scroll h-[40vh] whitespace-nowrap"
-  id="document-content"
->
+      <div
+        className="mb-6 text-lg text-left user-select-text whitespace-pre-wrap mt-6 overflow-y-scroll h-[40vh] whitespace-nowrap"
+        id="document-content"
+      >
         {document.content}
       </div>
 
       <div className="flex space-x-4 mb-8">
-        {isAuthenticated ? (
-          userProfile.username === document.username ? (
-            <>
-              {document.isAnnotable && (
-                <>
-                  <Link to={`/tambah-pengetahuan?documentId=${id}`}>
-                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                      Tambahkan Pengetahuan
-                    </button>
-                  </Link>
-                  <Link to={`/buat-arsip?documentId=${id}`}>
-                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                      Tambahkan Versi
-                    </button>
-                  </Link>
-                </>
-              )}
-            </>
-          ) : (
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-              Daftar Menjadi Verifier
-            </button>
-          )
-        ) : null}
+        {isAuthenticated && (
+          <>
+            {userProfile.username === document.username ? (
+              <>
+                {document.isAnnotable && (
+                  <>
+                    <Link to={`/tambah-pengetahuan?documentId=${id}`}>
+                      <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                        Tambahkan Pengetahuan
+                      </button>
+                    </Link>
+                    <Link to={`/buat-arsip?documentId=${id}`}>
+                      <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                        Tambahkan Versi
+                      </button>
+                    </Link>
+                  </>
+                )}
+              </>
+            ) : (
+              showVerifierButton &&
+              document.isAnnotable && (
+                <button
+                  onClick={handleRegisterVerifier}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                >
+                  Daftar Menjadi Verifier
+                </button>
+              )
+            )}
+          </>
+        )}
       </div>
 
       <h2 className="text-3xl font-bold mb-6">Tags</h2>

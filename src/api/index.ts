@@ -1,5 +1,6 @@
 import axios from "axios";
 import { isAuthenticated, clearAuth } from "../utils/auth";
+import type { Document } from "../types/document";
 
 const API_URL = "http://localhost:8081";
 
@@ -13,7 +14,11 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.data?.error_code === "X01001")) {
+    if (
+      error.response &&
+      (error.response.status === 401 ||
+        error.response.data?.error_code === "X01001")
+    ) {
       clearAuth();
       window.location.href = "/login";
     }
@@ -32,33 +37,90 @@ const getAuthHeaders = (): AxiosRequestConfig["headers"] => {
   return headers;
 };
 
-export const getDocuments = (
+export const getDocuments = (page = 0, searchTerm = "") => {
+  const params: { keyword?: string; page?: number } = {};
+  if (searchTerm?.trim()) {
+    params.keyword = searchTerm.trim();
+  }
+  params.page = page;
+
+  return api
+    .get(`/public/document`, {
+      headers: getAuthHeaders(),
+      params,
+    })
+    .then((response) => {
+      const documents = response.data.data.content.map((doc: Document) => ({
+        ...doc,
+        isError: doc.isError,
+      }));
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          data: {
+            ...response.data.data,
+            content: documents,
+          },
+        },
+      };
+    });
+};
+
+export const getMyDocuments = (
   page = 0,
-  searchTerm = "",
+  value = "", // This will now be the value for the filter
   sort = "asc",
-  sortBy = "id"
+  sortBy = "id",
+  column = "title" // This will now be the column for the filter
 ) => {
   const params: { column?: string; value?: string } = {};
-  if (searchTerm?.trim()) {
-    params.column = "title";
-    params.value = searchTerm.trim();
+  if (value?.trim()) {
+    params.column = column;
+    params.value = value.trim();
   }
 
-  return api.get(`/document/${sort}/${sortBy}/${page}`, {
-    headers: getAuthHeaders(),
-    params,
-  });
+  return api
+    .get(`/document/${sort}/${sortBy}/${page}`, {
+      headers: getAuthHeaders(),
+      params,
+    })
+    .then((response) => {
+      const documents = response.data.data.content.map((doc: Document) => ({
+        ...doc,
+        isError: doc.isError,
+      }));
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          data: {
+            ...response.data.data,
+            content: documents,
+          },
+        },
+      };
+    });
+};
+
+export const checkVerifierStatus = (id: number) => {
+  return api.get(`/appliance/${id}`, { headers: getAuthHeaders() });
+};
+
+export const registerAsVerifier = (id: number) => {
+  return api.post(`/appliance/${id}`, null, { headers: getAuthHeaders() });
 };
 
 export const getDocumentById = (id: number) => {
-  return api.get(`/public/document/${id}`, { headers: getAuthHeaders() })
-    .then(response => {
+  return api
+    .get(`/public/document/${id}`, { headers: getAuthHeaders() })
+    .then((response) => {
       return response.data;
     });
 };
 
 export const getProfile = () => {
-  return api.get("/profile", { headers: getAuthHeaders() }).then(response => {
+  return api.get("/profile", { headers: getAuthHeaders() }).then((response) => {
     console.log("API - getProfile response data:", response.data);
     return response;
   });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getDocuments } from '../api';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Document } from '../types/document';
 
 const HomePage: React.FC = () => {
@@ -27,10 +27,10 @@ const HomePage: React.FC = () => {
       </h1>
       <ul>
         {documents.map((document) => (
-          <li key={document.id}>
-            <button onClick={() => navigate(`/arsip/${document.id}`)} className="text-link-nav hover:underline">
+          <li key={document.id} className="text-link-nav hover:underline">
+            <Link to={`/arsip/${document.id}`} className="block">
               {document.title}
-            </button>
+            </Link>
           </li>
         ))}
       </ul>

@@ -37,6 +37,7 @@ export interface Document {
   username: string;
   isAnnotable: boolean;
   isVerifiedAll: boolean;
+  isError: boolean; // Added isError property
 }
 
 export interface RelatedDocument extends Document {

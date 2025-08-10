@@ -79,16 +79,15 @@ const LandingPage: React.FC = () => {
           (documents.length > 0 ? (
             <div className="flex justify-center gap-12 flex-wrap max-w-7xlxl md:mx-auto text-left mb-4">
               {documents.slice(0, 3).map((document: Document) => (
-                <div
+                <Link
+                  to={`/arsip/${document.id}`}
                   key={document.id}
                   className="flex flex-col justify-between basis-1/4 min-w-64 min-h-40 p-4 border rounded-md shadow-md bg-primary"
                 >
                   <div>
-                    <Link to={`/arsip/${document.id}`}>
-                      <div className="font-bold mb-5 text-xl text-link-nav">
-                        {document.title}
-                      </div>
-                    </Link>
+                    <div className="font-bold mb-5 text-xl text-link-nav">
+                      {document.title}
+                    </div>
                     <div className="font-semibold italic mb-5 text-title">
                       Dibuat oleh
                       {" " + document.name}
@@ -102,7 +101,7 @@ const LandingPage: React.FC = () => {
                   <div className="text-text-main mb-0">
                     {formatDate(document.createdAt)}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

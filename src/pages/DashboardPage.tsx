@@ -59,24 +59,24 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-4">Dashboard</h1>
-      <div className="flex justify-center space-x-4 mb-8">
-        <button className="bg-gray-800 text-white px-6 py-2 rounded-full">
+      <div className="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mb-8">
+        <button className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto">
           Buat Organisasi
         </button>
-        <button className="bg-gray-800 text-white px-6 py-2 rounded-full">
+        <button className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto">
           Buat Arsip
         </button>
-        <button className="bg-gray-800 text-white px-6 py-2 rounded-full">
+        <button className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto">
           Perbarui Organisasi
         </button>
       </div>
 
       <h2 className="text-2xl font-bold text-center mb-4">List Arsipku</h2>
 
-      <div className="flex space-x-4 mb-4">
+      <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 mb-4">
         <input
           type="text"
-          placeholder="Cari Arsip"
+          placeholder="Judul Arsip"
           className="w-full p-2 border rounded"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -88,14 +88,14 @@ const DashboardPage: React.FC = () => {
         />
         <button
           onClick={() => setSearchQuery(searchTerm)}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full md:w-auto"
         >
-          Search
+          Cari
         </button>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full md:w-auto"
         >
           <option value="asc">Urutan Naik</option>
           <option value="desc">Urutan Turun</option>
@@ -103,7 +103,7 @@ const DashboardPage: React.FC = () => {
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full md:w-auto"
         >
           <option value="public">Publik</option>
           <option value="pribadi">Pribadi</option>
@@ -112,7 +112,7 @@ const DashboardPage: React.FC = () => {
         <select
           value={verified}
           onChange={(e) => setVerified(e.target.value)}
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full md:w-auto"
         >
           <option value="verified">Telah Diverifikasi</option>
           <option value="unverified">Belum Diverifikasi</option>
@@ -124,8 +124,8 @@ const DashboardPage: React.FC = () => {
       <div className="space-y-4">
         {filteredDocuments.map((doc) => (
           <div key={doc.id} className="p-4 border rounded shadow">
-            <div className="flex justify-between items-start">
-              <div>
+            <div className="flex flex-col md:flex-row justify-between items-start">
+              <div className="w-full md:w-auto">
                 <h3 className="text-xl font-bold">{doc.title}</h3>
                 <p className="text-sm text-gray-500">
                   Version {doc.version}.{doc.subversion}
@@ -149,16 +149,16 @@ const DashboardPage: React.FC = () => {
                   {new Date(doc.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
                 <Link
                   to={`/arsip/${doc.id}`}
-                  className="bg-gray-800 text-white px-4 py-2 rounded text-center"
+                  className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full"
                 >
                   Lihat Pengetahuan
                 </Link>
                 <Link
                   to={`/tambah-pengetahuan?documentId=${doc.id}`}
-                  className="bg-gray-800 text-white px-4 py-2 rounded"
+                  className="bg-gray-800 text-white px-4 py-2 rounded w-full text-center"
                 >
                   Tambahkan Pengetahuan
                 </Link>
@@ -173,7 +173,8 @@ const DashboardPage: React.FC = () => {
           disabled={currentPage === 0}
           className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
         >
-          {"<"}
+          <span className="hidden md:inline">{"<"}</span>
+          <span className="md:hidden">Prev</span>
         </button>
         <span>
           {currentPage + 1} of {totalPages}
@@ -183,7 +184,8 @@ const DashboardPage: React.FC = () => {
           disabled={currentPage === totalPages - 1}
           className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
         >
-          {">"}
+          <span className="hidden md:inline">{">"}</span>
+          <span className="md:hidden">Next</span>
         </button>
       </div>
     </div>

@@ -18,6 +18,7 @@ import DetailArsipPage from "./pages/DetailArsipPage";
 import ProfilePage from "./pages/ProfilePage";
 import BuatArsipPage from "./pages/BuatArsipPage";
 import TambahPengetahuanPage from "./pages/TambahPengetahuanPage";
+import BuatOrganisasiPage from "./pages/BuatOrganisasiPage";
 import Modal from "./components/Modal";
 
 function App() {
@@ -76,6 +77,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <TambahPengetahuanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buat-organisasi"
+            element={
+              <ProtectedRoute>
+                <BuatOrganisasiPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/update-organisasi"
+            element={
+              <ProtectedRoute>
+                <BuatOrganisasiPage />
               </ProtectedRoute>
             }
           />

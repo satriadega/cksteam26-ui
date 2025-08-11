@@ -92,11 +92,16 @@ const LandingPage: React.FC = () => {
                       Dibuat oleh
                       {" " + document.name}
                     </div>
-<p className="text-text-main mb-4 whitespace-nowrap">
-  {document.content.length > 100
-    ? `${document.content.substring(0, 100)}...`
-    : document.content}
-</p>
+                    <div className="w-max-full">
+                      <p
+                        className="text-text-main mb-4"
+                        style={{ wordWrap: "break-word" }}
+                      >
+                        {document.content.length > 100
+                          ? `${document.content.substring(0, 100)}...`
+                          : document.content}
+                      </p>
+                    </div>
                   </div>
                   <div className="text-text-main mb-0">
                     {formatDate(document.createdAt)}

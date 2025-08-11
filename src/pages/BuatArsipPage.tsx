@@ -80,6 +80,7 @@ const BuatArsipPage: React.FC = () => {
         version: ver,
         subversion: subver,
         private: isPrivate,
+        isError: false,
       };
       const res = await createDocument(document);
       if (res && res.data && res.data.documentId) {

@@ -14,13 +14,11 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (
-      error.response &&
-      (error.response.status === 401 ||
-        error.response.data?.error_code === "X01001")
-    ) {
-      clearAuth();
-      window.location.href = "/login";
+    if (error.response && error.response.data?.error_code === "X01001") {
+      if (!isAuthenticated()) {
+        clearAuth();
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
@@ -65,6 +63,21 @@ export const getDocuments = (page = 0, searchTerm = "") => {
         },
       };
     });
+};
+
+export const getOrganizations = () => {
+  return api.get("/organization", { headers: getAuthHeaders() });
+};
+
+export const createOrganization = (data: {
+  organizationName: string;
+  members: string[];
+}) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+  return api.post("/organization", data, { headers });
 };
 
 export const getMyDocuments = (
@@ -200,4 +213,19 @@ export const getAnnotations = (
     headers: getAuthHeaders(),
     params,
   });
+};
+
+export const getOrganizationById = (id: number) => {
+  return api.get(`/organization/${id}`, { headers: getAuthHeaders() });
+};
+
+export const updateOrganization = (
+  id: number,
+  data: { organizationName: string; publicVisibility: boolean }
+) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+  return api.put(`/organization/${id}`, data, { headers });
 };

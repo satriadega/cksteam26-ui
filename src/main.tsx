@@ -4,7 +4,6 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import "./input.css";
 import App from "./App.tsx";
-import Modal from './components/Modal';
 import { isAuthenticated } from './utils/auth';
 import { setUser } from './store/userSlice';
 import { getProfile } from './api'; // Import getProfile
@@ -42,7 +41,6 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <App />
-      <Modal />
     </Provider>
   </StrictMode>
 );

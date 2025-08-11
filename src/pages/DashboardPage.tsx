@@ -11,7 +11,6 @@ const DashboardPage: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [annotations] = useState<Annotation[]>([]);
   const [documentError, setDocumentError] = useState<string | null>(null);
-  const [annotationError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // This will be the actual query sent to API
   const [documentFilterColumn] = useState("title");
@@ -125,15 +124,21 @@ const DashboardPage: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-4">Dashboard</h1>
       <div className="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mb-8">
-        <button className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto">
+        <Link
+          to="/buat-organisasi"
+          className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto text-center"
+        >
           Buat Organisasi
-        </button>
-        <button className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto">
+        </Link>
+        <Link
+          to="/perbarui-organisasi"
+          className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto text-center"
+        >
           Perbarui Organisasi
-        </button>
+        </Link>
         <Link
           to="/buat-arsip"
-          className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto"
+          className="bg-gray-800 text-white px-6 py-2 rounded w-full md:w-auto text-center"
         >
           Buat Arsip
         </Link>
@@ -363,8 +368,8 @@ const DashboardPage: React.FC = () => {
         </select>
       </div>
 
-      {annotationError && annotations.length === 0 && (
-        <p className="text-red-500">{annotationError}</p>
+      {annotations.length === 0 && (
+        <p className="text-red-500">Pengetahuan tidak ditemukan!</p>
       )}
 
       {annotations.length > 0 && (

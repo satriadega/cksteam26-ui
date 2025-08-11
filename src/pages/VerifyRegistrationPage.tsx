@@ -7,8 +7,42 @@ const VerifyRegistrationPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { email, otp } = location.state || { email: "", otp: "" };
+  const { email, otp } = location.state || { email: "", otp: undefined };
   const [token, setToken] = useState("");
+
+  if (!otp) {
+    return (
+      <div className="relative flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="absolute top-4 left-4">
+          <a href="/" className="text-accent hover:underline text-lg font-medium">
+            Home
+          </a>
+        </div>
+        <h1 className="text-4xl font-bold mb-8">
+          <a href="/" className="text-accent hover:underline">
+            Arsipku
+          </a>
+        </h1>
+        <div className="px-8 py-6 mt-4 text-left bg-white shadow-2xl rounded-lg w-96">
+          <h3 className="text-2xl font-bold text-center mb-6 text-red-500">
+            Error
+          </h3>
+          <p className="text-lg text-center">
+            OTP tidak ditemukan. Silakan kembali ke halaman register dan coba
+            lagi.
+          </p>
+          <div className="flex items-baseline justify-center mt-4">
+            <button
+              onClick={() => navigate("/register")}
+              className="px-6 py-2 text-white bg-link-nav rounded-md hover:bg-button-highlight-blue focus:outline-none focus:bg-button-highlight-blue"
+            >
+              Kembali ke Register
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

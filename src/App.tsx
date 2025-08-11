@@ -19,6 +19,8 @@ import ProfilePage from "./pages/ProfilePage";
 import BuatArsipPage from "./pages/BuatArsipPage";
 import TambahPengetahuanPage from "./pages/TambahPengetahuanPage";
 import BuatOrganisasiPage from "./pages/BuatOrganisasiPage";
+import UpdateOrganisasiPage from "./pages/UpdateOrganisasiPage";
+import ListAppliancePage from "./pages/ListAppliancePage";
 import Modal from "./components/Modal";
 
 function App() {
@@ -89,10 +91,18 @@ function App() {
             }
           />
           <Route
-            path="/update-organisasi"
+            path="/perbarui-organisasi"
             element={
               <ProtectedRoute>
-                <BuatOrganisasiPage />
+                <UpdateOrganisasiPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/list-appliance"
+            element={
+              <ProtectedRoute>
+                <ListAppliancePage />
               </ProtectedRoute>
             }
           />

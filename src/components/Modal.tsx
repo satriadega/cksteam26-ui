@@ -33,14 +33,22 @@ const Modal: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-lg w-96">
           <h2
             className={`text-xl font-bold mb-4 ${
-              type === "success" ? "text-green-600" : "text-red-600"
+              type === "success"
+                ? "text-green-600"
+                : type === "error"
+                ? "text-red-600"
+                : "text-gray-800"
             }`}
           >
-            {type === "success" ? "Sukses" : "Error"}
+            {type === "success"
+              ? "Sukses"
+              : type === "error"
+              ? "Error"
+              : "Konfirmasi"}
           </h2>
           <p className="mb-6">{message}</p>
           <div className="flex justify-end space-x-4">
-            {onCancel && (
+            {(type === "confirm" || onCancel) && (
               <button
                 onClick={handleCancel}
                 className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
@@ -48,19 +56,21 @@ const Modal: React.FC = () => {
                 Batal
               </button>
             )}
-            {onConfirm && (
+            {(type === "confirm" || onConfirm) && (
               <button
                 onClick={handleConfirm}
                 className={`px-4 py-2 ${
                   type === "success"
                     ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
+                    : type === "error"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-blue-500 hover:bg-blue-600"
                 } text-white rounded`}
               >
                 OK
               </button>
             )}
-            {!onConfirm && !onCancel && (
+            {!onConfirm && !onCancel && type !== "confirm" && (
               <button
                 onClick={() => dispatch(hideModal())}
                 className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"

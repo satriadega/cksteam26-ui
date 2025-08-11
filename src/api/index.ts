@@ -14,23 +14,29 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.data?.error_code === "X01001") {
-      if (!isAuthenticated()) {
-        clearAuth();
-        window.location.href = "/login";
-      }
+    const publicEndpoints = ["/public/document", "/public/document/related/"]; // Add more public endpoints if needed
+    const isPublicEndpoint = publicEndpoints.some(path => error.config.url.includes(path));
+    const ignoreAuthErrorHeader = error.config.headers?.['X-Ignore-Auth-Error'] === 'true';
+
+    if (error.response && error.response.data?.error_code === "X01001" && !isPublicEndpoint && !ignoreAuthErrorHeader) {
+      // Clear authentication and redirect to login only if it's not a public endpoint
+      clearAuth();
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
 );
 
-const getAuthHeaders = (): AxiosRequestConfig["headers"] => {
+const getAuthHeaders = (ignoreAuthError = false): AxiosRequestConfig["headers"] => {
   const headers: AxiosRequestConfig["headers"] = {};
   if (isAuthenticated()) {
     const token = localStorage.getItem("token");
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
+  }
+  if (ignoreAuthError) {
+    headers['X-Ignore-Auth-Error'] = 'true'; // Custom header to signal interceptor
   }
   return headers;
 };
@@ -42,11 +48,13 @@ export const getDocuments = (page = 0, searchTerm = "") => {
   }
   params.page = page;
 
+  const config: AxiosRequestConfig = { params };
+  if (isAuthenticated()) {
+    config.headers = getAuthHeaders();
+  }
+
   return api
-    .get(`/public/document`, {
-      headers: getAuthHeaders(),
-      params,
-    })
+    .get(`/public/document`, config)
     .then((response) => {
       const documents = response.data.data.content.map((doc: Document) => ({
         ...doc,
@@ -116,17 +124,25 @@ export const getMyDocuments = (
     });
 };
 
-export const checkVerifierStatus = (id: number) => {
-  return api.get(`/appliance/${id}`, { headers: getAuthHeaders() });
+export const checkVerifierStatus = (id: number, ignoreAuthError = false) => {
+  return api.get(`/appliance/${id}`, { headers: getAuthHeaders(ignoreAuthError) });
 };
 
-export const registerAsVerifier = (id: number) => {
-  return api.post(`/appliance/${id}`, null, { headers: getAuthHeaders() });
+export const registerAsVerifier = (id: number, ignoreAuthError = false) => {
+  return api.post(`/appliance/${id}`, null, { headers: getAuthHeaders(ignoreAuthError) });
+};
+
+export const getApplianceStatus = (id: number, ignoreAuthError = false) => {
+  return api.get(`/appliance/${id}`, { headers: getAuthHeaders(ignoreAuthError) });
 };
 
 export const getDocumentById = (id: number) => {
+  const config: AxiosRequestConfig = {};
+  if (isAuthenticated()) {
+    config.headers = getAuthHeaders();
+  }
   return api
-    .get(`/public/document/${id}`, { headers: getAuthHeaders() })
+    .get(`/public/document/${id}`, config)
     .then((response) => {
       return response.data;
     });
@@ -170,9 +186,11 @@ export const createDocument = (data: {
 };
 
 export const getRelatedDocuments = (documentId: number) => {
-  return api.get(`/public/document/related/${documentId}`, {
-    headers: getAuthHeaders(),
-  });
+  const config: AxiosRequestConfig = {};
+  if (isAuthenticated()) {
+    config.headers = getAuthHeaders();
+  }
+  return api.get(`/public/document/related/${documentId}`, config);
 };
 
 export const getAnnotationsByDocumentId = (documentId: number) => {
@@ -221,11 +239,15 @@ export const getOrganizationById = (id: number) => {
 
 export const updateOrganization = (
   id: number,
-  data: { organizationName: string; publicVisibility: boolean }
+  data: { organizationName: string; addMember?: string[]; removeMember?: string[] }
 ) => {
   const headers = {
     "Content-Type": "application/json",
     ...getAuthHeaders(),
   };
   return api.put(`/organization/${id}`, data, { headers });
+};
+
+export const deleteOrganization = (id: number) => {
+  return api.delete(`/organization/${id}`, { headers: getAuthHeaders() });
 };

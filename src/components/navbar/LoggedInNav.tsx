@@ -223,7 +223,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                       onClick={() => setNotificationDropdownOpen(false)}
                     >
-                      List Appliance
+                      List Pendaftaran Verifier
                       {(notificationType === 1 || notificationType === 3) && (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -388,7 +388,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                         toggleMobileMenu();
                       }}
                     >
-                      List Appliance
+                      List Pendaftaran Verifier
                       {(notificationType === 1 || notificationType === 3) && (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

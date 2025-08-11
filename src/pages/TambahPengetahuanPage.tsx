@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getDocumentById, createAnnotation, getRelatedDocuments } from "../api";
+import {
+  getDocumentById,
+  createAnnotation,
+  getRelatedDocuments,
+  getApplianceStatus,
+} from "../api";
 import { useSearchParams, Link } from "react-router-dom";
 import type { Document, Annotation, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
+import { AxiosError } from "axios";
+import { isAuthenticated as checkAuthStatus } from "../utils/auth";
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -48,6 +55,8 @@ const TambahPengetahuanPage: React.FC = () => {
   const [end, setEnd] = useState(0);
   const [versions, setVersions] = useState<Version[]>([]);
   const [showVersions, setShowVersions] = useState(false);
+  const [canAddKnowledge, setCanAddKnowledge] = useState(false); // New state for adding knowledge
+  const [showPendingMessage, setShowPendingMessage] = useState(false); // New state for pending message
 
   const stopMarkText = () => {
     setAutoMarking(false);
@@ -103,14 +112,16 @@ const TambahPengetahuanPage: React.FC = () => {
       }
       setShowAnnotationBox(true);
     }
-  }, [contentRef, setSelectedText, setStart, setEnd, setShowAnnotationBox]); // Updated dependencies
+  }, [contentRef, setSelectedText, setStart, setEnd, setShowAnnotationBox]);
 
   interface CustomError extends Error {
     response?: {
       data?: {
         data?: { field: string; message: string }[];
         message?: string;
+        error_code?: string; // Added error_code
       };
+      status?: number; // Added status
     };
   }
 
@@ -140,44 +151,47 @@ const TambahPengetahuanPage: React.FC = () => {
       const customError = error as CustomError;
       if (customError instanceof Error) {
         console.error("Error creating annotation:", customError.message);
-if (customError.response && customError.response.data) {
-  const errorData = customError.response.data;
-  if (errorData.data && Array.isArray(errorData.data)) {
-    errorData.data.forEach(
-      (err: { field: string; message: string }) => {
-        dispatch(
-          showModal({
-            type: "error",
-            message: `Error in ${err.field}: ${err.message}`,
-          })
-        );
-      }
-    );
-  } else if (errorData.message && errorData.message.includes("Authentication")) {
-    dispatch(
-      showModal({
-        type: "error",
-        message: "Authentication error. Please log in again.",
-      })
-    );
-  } else {
-    dispatch(
-      showModal({
-        type: "error",
-        message:
-          errorData.message ||
-          "Gagal membuat anotasi. Silakan coba lagi.",
-      })
-    );
-  }
-} else {
-  dispatch(
-    showModal({
-      type: "error",
-      message: "Gagal membuat anotasi. Silakan coba lagi.",
-    })
-  );
-}
+        if (customError.response && customError.response.data) {
+          const errorData = customError.response.data;
+          if (errorData.data && Array.isArray(errorData.data)) {
+            errorData.data.forEach(
+              (err: { field: string; message: string }) => {
+                dispatch(
+                  showModal({
+                    type: "error",
+                    message: `Error in ${err.field}: ${err.message}`,
+                  })
+                );
+              }
+            );
+          } else if (
+            errorData.message &&
+            errorData.message.includes("Authentication")
+          ) {
+            dispatch(
+              showModal({
+                type: "error",
+                message: "Authentication error. Please log in again.",
+              })
+            );
+          } else {
+            dispatch(
+              showModal({
+                type: "error",
+                message:
+                  errorData.message ||
+                  "Gagal membuat anotasi. Silakan coba lagi.",
+              })
+            );
+          }
+        } else {
+          dispatch(
+            showModal({
+              type: "error",
+              message: "Gagal membuat anotasi. Silakan coba lagi.",
+            })
+          );
+        }
       } else {
         console.error("Unknown error creating annotation:", customError);
         dispatch(
@@ -251,6 +265,60 @@ if (customError.response && customError.response.data) {
           if (docResponse.data.annotations) {
             setAnnotations(docResponse.data.annotations);
           }
+
+          // Check appliance status for this document
+          if (checkAuthStatus()) {
+            // Only check if authenticated
+            try {
+              const applianceResponse = await getApplianceStatus(docId, true); // Pass true to ignoreAuthError
+              if (
+                applianceResponse.data &&
+                applianceResponse.data.success &&
+                applianceResponse.data.data
+              ) {
+                if (applianceResponse.data.data.accepted === false) {
+                  setShowPendingMessage(true);
+                  setCanAddKnowledge(false);
+                } else {
+                  setCanAddKnowledge(true); // User is accepted verifier
+                  setShowPendingMessage(false);
+                }
+              } else {
+                setCanAddKnowledge(false); // Not a verifier or no data
+                setShowPendingMessage(false);
+              }
+            } catch (error) {
+              const axiosError = error as AxiosError;
+              // If it's an expected auth error (401/403), a 404 (not found),
+              // or a 400 with "DATA IS NOT FOUND" (DOC05FV055), treat as not a verifier
+              if (
+                axiosError.response &&
+                (axiosError.response.status === 401 ||
+                  axiosError.response.status === 403 ||
+                  axiosError.response.status === 404 ||
+                  (axiosError.response.status === 400 &&
+                    (axiosError.response.data as any)?.error_code ===
+                      "DOC05FV055" &&
+                    (axiosError.response.data as any)?.message ===
+                      "DATA IS NOT FOUND"))
+              ) {
+                setCanAddKnowledge(false); // Not a verifier or not logged in
+                setShowPendingMessage(false);
+                console.warn(
+                  "Failed to fetch appliance status (expected for unauthenticated/not found/not a verifier):",
+                  axiosError
+                );
+              } else {
+                console.error("Error fetching appliance status:", error);
+                setCanAddKnowledge(false); // Default to false on unexpected error
+                setShowPendingMessage(false);
+              }
+            }
+          } else {
+            setCanAddKnowledge(false); // Not authenticated, cannot add knowledge
+            setShowPendingMessage(false);
+          }
+
           dispatch(hideModal());
         } catch (error: unknown) {
           if (error instanceof Error) {
@@ -274,7 +342,7 @@ if (customError.response && customError.response.data) {
       }
     };
     fetchData();
-  }, [documentId, dispatch]);
+  }, [documentId, dispatch]); // Added dispatch to dependencies
 
   if (!currentDocument) {
     return null;
@@ -334,23 +402,34 @@ if (customError.response && customError.response.data) {
       </div>
 
       <div className="flex space-x-4 mb-8">
-        <button
-          onClick={handleMarkText}
-          className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
-        >
-          {autoMarking === true ? "Sedang menandai kalimat" : "Tandai kalimat"}
-        </button>
-        {autoMarking && (
-          <button
-            onClick={stopMarkText}
-            className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
-          >
-            Berhenti menandai kalimat
-          </button>
+        {showPendingMessage && (
+          <p className="text-center text-gray-600 font-semibold bg-yellow-400 p-2 rounded-sm">
+            Sedang menunggu diterima
+          </p>
+        )}
+        {canAddKnowledge && (
+          <>
+            <button
+              onClick={handleMarkText}
+              className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+            >
+              {autoMarking === true
+                ? "Sedang menandai kalimat"
+                : "Tandai kalimat"}
+            </button>
+            {autoMarking && (
+              <button
+                onClick={stopMarkText}
+                className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+              >
+                Berhenti menandai kalimat
+              </button>
+            )}
+          </>
         )}
       </div>
 
-      {showAnnotationBox && (
+      {canAddKnowledge && showAnnotationBox && (
         <div className="p-4 border rounded-md mt-4 text-left">
           <h3 className="text-lg font-bold mb-2">Buat Anotasi</h3>
           {selectedText && (

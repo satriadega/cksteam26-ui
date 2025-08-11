@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { getMyDocuments } from "../api";
+import { getMyDocuments, getAnnotations } from "../api"; // Import getAnnotations
 import { showModal, hideModal } from "../store/modalSlice";
 import type { Document } from "../types/document";
 import type { Annotation } from "../types/annotation";
@@ -9,8 +9,9 @@ import type { Annotation } from "../types/annotation";
 const DashboardPage: React.FC = () => {
   const dispatch = useDispatch();
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [annotations] = useState<Annotation[]>([]);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]); // Update annotations state
   const [documentError, setDocumentError] = useState<string | null>(null);
+  const [annotationError, setAnnotationError] = useState<string | null>(null); // New state for annotation errors
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // This will be the actual query sent to API
   const [documentFilterColumn] = useState("title");
@@ -18,7 +19,7 @@ const DashboardPage: React.FC = () => {
   const documentSortBy = "id"; // Default sort by ID for documents
 
   const [annotationSearchTerm, setAnnotationSearchTerm] = useState("");
-  const [, setAnnotationSearchQuery] = useState("");
+  const [annotationSearchQuery, setAnnotationSearchQuery] = useState(""); // Update annotationSearchQuery
   const [annotationFilterColumn, setAnnotationFilterColumn] =
     useState("selectedText");
   const [visibility, setVisibility] = useState("public");
@@ -26,7 +27,7 @@ const DashboardPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [annotationCurrentPage, setAnnotationCurrentPage] = useState(0);
-  const [annotationTotalPages] = useState(0);
+  const [annotationTotalPages, setAnnotationTotalPages] = useState(0); // Update annotationTotalPages
   const [annotationSort, setAnnotationSort] = useState("asc");
 
   // New state to manage active filter type
@@ -120,6 +121,40 @@ const DashboardPage: React.FC = () => {
     setCurrentPage(0);
   };
 
+  const fetchAnnotations = useCallback(async () => {
+    dispatch(showModal({ type: "loading", message: "Memuat pengetahuan..." }));
+    setAnnotationError(null);
+    try {
+      const response = await getAnnotations(
+        annotationCurrentPage,
+        annotationSearchQuery,
+        annotationSort,
+        "id", // sortBy is always 'id' for annotations as per backend
+        annotationFilterColumn
+      );
+      setAnnotations(response.data.data.content);
+      setAnnotationTotalPages(response.data.data.total_pages);
+    } catch (error) {
+      console.error("Error fetching annotations:", error);
+      setAnnotationError("Pengetahuan tidak ditemukan!");
+      setAnnotations([]);
+      setAnnotationTotalPages(0);
+    } finally {
+      dispatch(hideModal());
+    }
+  }, [
+    annotationCurrentPage,
+    annotationSearchQuery,
+    annotationSort,
+    annotationFilterColumn,
+    dispatch,
+  ]);
+
+  useEffect(() => {
+    fetchDocuments();
+    fetchAnnotations(); // Call fetchAnnotations here
+  }, [fetchDocuments, fetchAnnotations]);
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-4">Dashboard</h1>
@@ -189,8 +224,7 @@ const DashboardPage: React.FC = () => {
         {documents
           ?.filter((doc) => !doc.isError) // Keep only the isError filter
           .map((doc) => (
-            <Link
-              to={`/arsip/${doc.id}`}
+            <div
               key={doc.id}
               className="block p-4 border rounded shadow"
             >
@@ -228,9 +262,12 @@ const DashboardPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
-                  <div className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]">
+                  <Link
+                    to={`/arsip/${doc.id}`}
+                    className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]"
+                  >
                     Lihat Arsip
-                  </div>
+                  </Link>
                   {doc.isAnnotable && (
                     <Link
                       to={`/tambah-pengetahuan?documentId=${doc.id}`}
@@ -241,7 +278,7 @@ const DashboardPage: React.FC = () => {
                   )}
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
       </div>
       <div className="flex justify-center items-center space-x-4 mt-4">
@@ -270,10 +307,9 @@ const DashboardPage: React.FC = () => {
         {documents
           ?.filter((doc) => doc.isError) // Keep only the isError filter
           .map((doc) => (
-            <Link
-              to={`/arsip/${doc.id}`}
+            <div
               key={doc.id}
-              className="block p-4 border rounded shadow"
+              className="p-4 border rounded shadow"
             >
               <div className="flex flex-col md:flex-row justify-between items-start">
                 <div
@@ -309,9 +345,12 @@ const DashboardPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
-                  <div className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]">
+                  <Link
+                    to={`/arsip/${doc.id}`}
+                    className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]"
+                  >
                     Lihat Arsip
-                  </div>
+                  </Link>
                   {doc.isAnnotable && (
                     <Link
                       to={`/tambah-pengetahuan?documentId=${doc.id}`}
@@ -322,7 +361,7 @@ const DashboardPage: React.FC = () => {
                   )}
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
       </div>
 
@@ -368,11 +407,13 @@ const DashboardPage: React.FC = () => {
         </select>
       </div>
 
-      {annotations.length === 0 && (
-        <p className="text-red-500">Pengetahuan tidak ditemukan!</p>
+      {annotationError && <p className="text-red-500">{annotationError}</p>}
+
+      {!annotationError && annotations.length === 0 && (
+        <p className="text-text-main">Belum ada pengetahuan.</p>
       )}
 
-      {annotations.length > 0 && (
+      {!annotationError && annotations.length > 0 && (
         <div className="space-y-4">
           {annotations.map((annotation) => (
             <div
@@ -407,7 +448,7 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
                   <Link
-                    to={`/buat-arsip?documentId=${annotation.documentId}`}
+                    to={`/arsip/${annotation.documentId}`}
                     className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]"
                   >
                     Lihat Arsip

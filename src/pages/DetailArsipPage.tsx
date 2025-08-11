@@ -5,13 +5,14 @@ import {
   getDocumentById,
   getProfile,
   getRelatedDocuments,
-  checkVerifierStatus,
   registerAsVerifier,
+  getApplianceStatus,
 } from "../api";
 import type { Document, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
 import { AxiosError } from "axios";
 import type { RootState } from "../store";
+import { isAuthenticated as checkAuthStatus } from "../utils/auth";
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -47,7 +48,9 @@ const DetailArsipPage: React.FC = () => {
   const [userProfile, setUserProfile] = useState({ username: "" });
   const [versions, setVersions] = useState<Version[]>([]);
   const [showVersions, setShowVersions] = useState(false);
-  const [showVerifierButton, setShowVerifierButton] = useState(false);
+  const [canRegisterAsVerifier, setCanRegisterAsVerifier] = useState(false);
+  const [showAddKnowledgeButton, setShowAddKnowledgeButton] = useState(false);
+  const [showPendingMessage, setShowPendingMessage] = useState(false);
   const { isAuthenticated, username: reduxUsername } = useSelector(
     (state: RootState) => state.user
   );
@@ -62,27 +65,93 @@ const DetailArsipPage: React.FC = () => {
           const docResponse = await getDocumentById(documentId);
           setDocument(docResponse.data);
 
+          // Fetch appliance status to determine both add knowledge and verifier button visibility
           try {
-            await checkVerifierStatus(documentId);
+            const applianceResponse = await getApplianceStatus(
+              documentId,
+              true
+            );
+            // console.log("Appliance API Response:", applianceResponse.data); // Debugging log removed
+            if (
+              applianceResponse.data &&
+              applianceResponse.data.success &&
+              applianceResponse.data.data
+            ) {
+              // Check for nested data
+              if (applianceResponse.data.data.accepted === false) {
+                // Corrected access
+                // User has applied but is pending acceptance
+                setShowPendingMessage(true);
+                setShowAddKnowledgeButton(false);
+                setCanRegisterAsVerifier(false); // Cannot register again if pending
+              } else {
+                // User IS a verifier for this document (accepted: true or no 'accepted' field implies accepted)
+                setShowAddKnowledgeButton(true);
+                setCanRegisterAsVerifier(false); // User is already a verifier, cannot register
+                setShowPendingMessage(false);
+              }
+            } else {
+              // User is NOT a verifier for this document (success: false or no data)
+              setShowAddKnowledgeButton(false);
+              setCanRegisterAsVerifier(true); // User is not a verifier, can register
+              setShowPendingMessage(false);
+            }
           } catch (error) {
             const axiosError = error as AxiosError;
-            if (axiosError.response && axiosError.response.status === 400) {
-              setShowVerifierButton(true);
+            // If it's an expected auth error (401/403), a 404 (not found),
+            // or a 400 with "DATA IS NOT FOUND" (DOC05FV055), treat as not a verifier
+            if (
+              axiosError.response &&
+              (axiosError.response.status === 401 ||
+                axiosError.response.status === 403 ||
+                axiosError.response.status === 404 ||
+                (axiosError.response.status === 400 &&
+                  (axiosError.response.data as any)?.error_code ===
+                    "DOC05FV055" &&
+                  (axiosError.response.data as any)?.message ===
+                    "DATA IS NOT FOUND"))
+            ) {
+              setShowAddKnowledgeButton(false);
+              setCanRegisterAsVerifier(true); // User is not a verifier or not logged in, can register
+              setShowPendingMessage(false); // Not pending if not found
+              console.warn(
+                "Failed to fetch appliance status (expected for unauthenticated/not found/not a verifier):",
+                axiosError
+              );
+            } else {
+              // Other unexpected errors
+              console.error("Failed to fetch appliance status:", error);
+              setShowAddKnowledgeButton(false);
+              setCanRegisterAsVerifier(true); // Default to showing register button on unexpected error
+              setShowPendingMessage(false);
             }
           }
 
-          if (isAuthenticated) {
-            const profileResponse = await getProfile();
-            if (
-              profileResponse.data &&
-              profileResponse.data.data &&
-              profileResponse.data.data.length > 0
-            ) {
-              const fetchedUsername =
-                profileResponse.data.data[0].username || "";
-              setUserProfile({ username: fetchedUsername });
-            } else {
+          if (checkAuthStatus()) {
+            // Use the imported isAuthenticated function
+            try {
+              const profileResponse = await getProfile();
+              // console.log("User Profile:", profileResponse.data); // Debugging log removed
+              if (
+                profileResponse.data &&
+                profileResponse.data.data &&
+                profileResponse.data.data.length > 0
+              ) {
+                const fetchedUsername =
+                  profileResponse.data.data[0].username || "";
+                setUserProfile({ username: fetchedUsername });
+              } else {
+                setUserProfile({ username: "" });
+              }
+            } catch (profileError) {
+              // If fetching profile fails (e.g., token expired),
+              // don't redirect, just treat user as unauthenticated for this page's profile features.
+              console.warn(
+                "Failed to fetch profile in DetailArsipPage:",
+                profileError
+              );
               setUserProfile({ username: "" });
+              // No need to show an error modal for profile fetch on a public page
             }
           }
 
@@ -167,15 +236,16 @@ const DetailArsipPage: React.FC = () => {
         })
       );
       try {
-        if (document?.referenceDocumentId) {
-          await registerAsVerifier(parseInt(id, 10));
+        if (document?.id) {
+          await registerAsVerifier(parseInt(id, 10), true);
           dispatch(
             showModal({
               type: "success",
               message: "Berhasil mendaftar sebagai verifier.",
             })
           );
-          setShowVerifierButton(false);
+          setCanRegisterAsVerifier(false);
+          setShowPendingMessage(true); // Show pending message after successful registration
         }
       } catch (error) {
         dispatch(
@@ -247,34 +317,42 @@ const DetailArsipPage: React.FC = () => {
       <div className="flex space-x-4 mb-8">
         {isAuthenticated && (
           <>
-            {userProfile.username === document.username ? (
+            {(userProfile.username === document.username ||
+              document.isAnnotable) && (
               <>
-                {document.isAnnotable && (
-                  <>
+                {showAddKnowledgeButton ||
+                  (userProfile.username === document.username && (
                     <Link to={`/tambah-pengetahuan?documentId=${id}`}>
                       <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
                         Tambahkan Pengetahuan
                       </button>
                     </Link>
-                    <Link to={`/buat-arsip?documentId=${id}`}>
-                      <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                        Tambahkan Versi
-                      </button>
-                    </Link>
-                  </>
+                  ))}
+                {userProfile.username === document.username && (
+                  <Link to={`/buat-arsip?documentId=${id}`}>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                      Tambahkan Versi
+                    </button>
+                  </Link>
                 )}
               </>
-            ) : (
-              showVerifierButton &&
-              document.isAnnotable && (
+            )}
+            {showPendingMessage && (
+              <p className="text-center text-gray-600 font-semibold bg-yellow-400 p-2 rounded-sm">
+                Aplikasi Verifier Sedang menunggu diterima
+              </p>
+            )}
+
+            {canRegisterAsVerifier &&
+              document.isAnnotable &&
+              userProfile.username !== document.username && (
                 <button
                   onClick={handleRegisterVerifier}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
                 >
                   Daftar Menjadi Verifier
                 </button>
-              )
-            )}
+              )}
           </>
         )}
       </div>

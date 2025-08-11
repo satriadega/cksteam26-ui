@@ -3,9 +3,11 @@ import { getProfile, updateProfile } from "../api";
 import type { Profile } from "../types/profile";
 import { useDispatch } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
@@ -60,6 +62,55 @@ const ProfilePage: React.FC = () => {
       console.error(err);
       dispatch(
         showModal({ type: "error", message: "Failed to update profile." })
+      );
+    } finally {
+      // The modal will be hidden by the user after they acknowledge the success/error message
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    if (!window.confirm("Are you sure you want to delete your profile? This action cannot be undone.")) {
+      return;
+    }
+
+    dispatch(showModal({ type: "loading", message: "Deleting profile..." }));
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+
+      const response = await fetch("http://localhost:8081/profile", {
+        method: "DELETE",
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`, // Use the dynamically retrieved token
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete profile.");
+      }
+
+      localStorage.removeItem("token"); // Clear token on successful deletion
+      dispatch(
+        showModal({ type: "success", message: "Profile deleted successfully!" })
+      );
+      navigate("/login"); // Redirect to login page after deletion
+    } catch (err) {
+      let errorMessage = "Failed to delete profile.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        errorMessage = (err as { message: string }).message;
+      }
+      setError(errorMessage);
+      console.error(err);
+      dispatch(
+        showModal({ type: "error", message: errorMessage })
       );
     } finally {
       // The modal will be hidden by the user after they acknowledge the success/error message
@@ -134,12 +185,19 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-start space-x-4">
           <button
             type="submit"
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
             Simpan
+          </button>
+          <button
+            type="button" // Changed to type="button" to prevent form submission
+            onClick={handleDeleteProfile}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Hapus Akun
           </button>
         </div>
       </form>

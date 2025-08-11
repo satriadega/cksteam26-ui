@@ -24,6 +24,7 @@ const Layout: React.FC = () => {
     "/tambah-pengetahuan",
     "/buat-organisasi",
     "/perbarui-organisasi",
+    "/list-appliance",
   ];
   const isKnownPath = knownPaths.some((path) =>
     matchPath({ path, end: true }, location.pathname)

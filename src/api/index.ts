@@ -2,9 +2,14 @@ import axios from "axios";
 import { isAuthenticated, clearAuth } from "../utils/auth";
 import type { Document } from "../types/document";
 
-const API_URL = "http://localhost:8081";
+const API_URL = "http://192.168.0.104:8081";
 
-import type { AxiosRequestConfig } from "axios";
+import type { AxiosRequestConfig, AxiosError } from "axios";
+
+interface ApiErrorData {
+  error_code?: string;
+  message?: string;
+}
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,10 +20,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const publicEndpoints = ["/public/document", "/public/document/related/"]; // Add more public endpoints if needed
-    const isPublicEndpoint = publicEndpoints.some(path => error.config.url.includes(path));
-    const ignoreAuthErrorHeader = error.config.headers?.['X-Ignore-Auth-Error'] === 'true';
+    const isPublicEndpoint = publicEndpoints.some((path) =>
+      error.config.url.includes(path)
+    );
+    const ignoreAuthErrorHeader =
+      error.config.headers?.["X-Ignore-Auth-Error"] === "true";
 
-    if (error.response && error.response.data?.error_code === "X01001" && !isPublicEndpoint && !ignoreAuthErrorHeader) {
+    if (
+      error.response &&
+      error.response.data?.error_code === "X01001" &&
+      !isPublicEndpoint &&
+      !ignoreAuthErrorHeader
+    ) {
       // Clear authentication and redirect to login only if it's not a public endpoint
       clearAuth();
       window.location.href = "/login";
@@ -27,7 +40,9 @@ api.interceptors.response.use(
   }
 );
 
-const getAuthHeaders = (ignoreAuthError = false): AxiosRequestConfig["headers"] => {
+const getAuthHeaders = (
+  ignoreAuthError = false
+): AxiosRequestConfig["headers"] => {
   const headers: AxiosRequestConfig["headers"] = {};
   if (isAuthenticated()) {
     const token = localStorage.getItem("token");
@@ -36,12 +51,12 @@ const getAuthHeaders = (ignoreAuthError = false): AxiosRequestConfig["headers"] 
     }
   }
   if (ignoreAuthError) {
-    headers['X-Ignore-Auth-Error'] = 'true'; // Custom header to signal interceptor
+    headers["X-Ignore-Auth-Error"] = "true"; // Custom header to signal interceptor
   }
   return headers;
 };
 
-export const getDocuments = (page = 0, searchTerm = "") => {
+export const getDocuments = async (page = 0, searchTerm = "") => {
   const params: { keyword?: string; page?: number } = {};
   if (searchTerm?.trim()) {
     params.keyword = searchTerm.trim();
@@ -53,24 +68,36 @@ export const getDocuments = (page = 0, searchTerm = "") => {
     config.headers = getAuthHeaders();
   }
 
-  return api
-    .get(`/public/document`, config)
-    .then((response) => {
-      const documents = response.data.data.content.map((doc: Document) => ({
-        ...doc,
-        isError: doc.isError,
-      }));
-      return {
-        ...response,
+  try {
+    const response = await api.get(`/public/document`, config);
+    const documents = response.data.data.content.map((doc: Document) => ({
+      ...doc,
+      isError: doc.isError,
+    }));
+    return {
+      ...response,
+      data: {
+        ...response.data,
         data: {
-          ...response.data,
+          ...response.data.data,
+          content: documents,
+        },
+      },
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError.response && axiosError.response.status === 400) {
+      return {
+        data: {
           data: {
-            ...response.data.data,
-            content: documents,
+            content: [],
+            total_pages: 0,
           },
         },
       };
-    });
+    }
+    throw error;
+  }
 };
 
 export const getOrganizations = () => {
@@ -125,15 +152,45 @@ export const getMyDocuments = (
 };
 
 export const checkVerifierStatus = (id: number, ignoreAuthError = false) => {
-  return api.get(`/appliance/${id}`, { headers: getAuthHeaders(ignoreAuthError) });
+  return api.get(`/appliance/${id}`, {
+    headers: getAuthHeaders(ignoreAuthError),
+  });
 };
 
 export const registerAsVerifier = (id: number, ignoreAuthError = false) => {
-  return api.post(`/appliance/${id}`, null, { headers: getAuthHeaders(ignoreAuthError) });
+  return api.post(`/appliance/${id}`, null, {
+    headers: getAuthHeaders(ignoreAuthError),
+  });
 };
 
-export const getApplianceStatus = (id: number, ignoreAuthError = false) => {
-  return api.get(`/appliance/${id}`, { headers: getAuthHeaders(ignoreAuthError) });
+export const getApplianceStatus = async (id: number, ignoreAuthError = false) => {
+  try {
+    const response = await api.get(`/appliance/${id}`, {
+      headers: getAuthHeaders(ignoreAuthError),
+    });
+    return response;
+  } catch (error) {
+const axiosError = error as AxiosError<ApiErrorData>;
+if (
+  axiosError.response &&
+  (axiosError.response.status === 401 ||
+	axiosError.response.status === 403 ||
+	axiosError.response.status === 404 ||
+	(axiosError.response.status === 400 &&
+	  axiosError.response.data?.error_code === "DOC05FV055" &&
+	  axiosError.response.data?.message === "DATA IS NOT FOUND"))
+) {
+      // Return a specific structure for "not a verifier" cases
+      return {
+        data: {
+          success: false,
+          message: "Not a verifier or not found.",
+        },
+      };
+    }
+    // For other errors, re-throw them to be handled by the caller
+    throw error;
+  }
 };
 
 export const getDocumentById = (id: number) => {
@@ -141,11 +198,9 @@ export const getDocumentById = (id: number) => {
   if (isAuthenticated()) {
     config.headers = getAuthHeaders();
   }
-  return api
-    .get(`/public/document/${id}`, config)
-    .then((response) => {
-      return response.data;
-    });
+  return api.get(`/public/document/${id}`, config).then((response) => {
+    return response.data;
+  });
 };
 
 export const getProfile = () => {
@@ -239,7 +294,11 @@ export const getOrganizationById = (id: number) => {
 
 export const updateOrganization = (
   id: number,
-  data: { organizationName: string; addMember?: string[]; removeMember?: string[] }
+  data: {
+    organizationName: string;
+    addMember?: string[];
+    removeMember?: string[];
+  }
 ) => {
   const headers = {
     "Content-Type": "application/json",

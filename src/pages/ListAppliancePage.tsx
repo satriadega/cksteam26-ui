@@ -46,7 +46,7 @@ const ListAppliancePage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:8081/appliance?page=${currentPage}&size=${itemsPerPage}`,
+          `http://192.168.0.104:8081/appliance?page=${currentPage}&size=${itemsPerPage}`,
           {
             method: "GET",
             headers: {
@@ -60,7 +60,11 @@ const ListAppliancePage: React.FC = () => {
           const errorData = await response.json();
           // Check for specific "data not found" message from the backend
           // Assuming the backend sends a message like "Data not found" or "No content"
-          if (errorData.message && (errorData.message.toLowerCase().includes("not found") || errorData.message.toLowerCase().includes("no content"))) {
+          if (
+            errorData.message &&
+            (errorData.message.toLowerCase().includes("not found") ||
+              errorData.message.toLowerCase().includes("no content"))
+          ) {
             setAppliances([]); // Set to empty array
             setTotalPages(1); // Reset total pages
             setLoading(false); // Stop loading
@@ -68,7 +72,10 @@ const ListAppliancePage: React.FC = () => {
             return; // Exit the function, no modal needed
           } else {
             // For other types of errors, throw to be caught and show modal
-            throw new Error(errorData.message || `Failed to fetch appliances with status: ${response.status}`);
+            throw new Error(
+              errorData.message ||
+                `Failed to fetch appliances with status: ${response.status}`
+            );
           }
         }
 
@@ -113,30 +120,50 @@ const ListAppliancePage: React.FC = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleAccept = async (documentId: number, username: string, isAccepted: boolean) => {
+  const handleAccept = async (
+    documentId: number,
+    username: string,
+    isAccepted: boolean
+  ) => {
     const bearerToken = getBearerToken();
     if (!bearerToken) {
-      dispatch(showModal({ type: "error", message: "Authentication token not found. Please log in.", onConfirm: () => navigate("/login") }));
+      dispatch(
+        showModal({
+          type: "error",
+          message: "Authentication token not found. Please log in.",
+          onConfirm: () => navigate("/login"),
+        })
+      );
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:8081/appliance/${documentId}`, {
-        method: "PUT",
-        headers: {
-          "accept": "*/*",
-          "Authorization": `Bearer ${bearerToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ isAccepted, username }),
-      });
+      const response = await fetch(
+        `http://192.168.0.104:8081/appliance/${documentId}`,
+        {
+          method: "PUT",
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${bearerToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ isAccepted, username }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to update appliance ${documentId}`);
+        throw new Error(
+          errorData.message || `Failed to update appliance ${documentId}`
+        );
       }
 
-      dispatch(showModal({ type: "success", message: `Appliance ${documentId} updated successfully!` }));
+      dispatch(
+        showModal({
+          type: "success",
+          message: `Appliance ${documentId} updated successfully!`,
+        })
+      );
       // Re-fetch appliances to update the list
       // This will trigger the useEffect to run again
       setCurrentPage(0); // Reset to first page after action
@@ -176,7 +203,10 @@ const ListAppliancePage: React.FC = () => {
                     <p className="text-lg">
                       <span className="font-semibold">{appliance.email}</span> /{" "}
                       {appliance.name} ingin menjadi verifier di Arsip "
-                      <a href={`/arsip/${appliance.documentId}`} className="text-blue-600 hover:underline">
+                      <a
+                        href={`/arsip/${appliance.documentId}`}
+                        className="text-blue-600 hover:underline"
+                      >
                         {appliance.name}
                       </a>
                       "
@@ -184,13 +214,25 @@ const ListAppliancePage: React.FC = () => {
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => handleAccept(appliance.documentId, appliance.username, true)}
+                      onClick={() =>
+                        handleAccept(
+                          appliance.documentId,
+                          appliance.username,
+                          true
+                        )
+                      }
                       className="px-6 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
                     >
                       Terima
                     </button>
                     <button
-                      onClick={() => handleAccept(appliance.documentId, appliance.username, false)}
+                      onClick={() =>
+                        handleAccept(
+                          appliance.documentId,
+                          appliance.username,
+                          false
+                        )
+                      }
                       className="px-6 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-700"
                     >
                       Tolak

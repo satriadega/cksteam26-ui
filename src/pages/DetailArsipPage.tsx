@@ -65,67 +65,32 @@ const DetailArsipPage: React.FC = () => {
           const docResponse = await getDocumentById(documentId);
           setDocument(docResponse.data);
 
-          // Fetch appliance status to determine both add knowledge and verifier button visibility
-          try {
-            const applianceResponse = await getApplianceStatus(
-              documentId,
-              true
-            );
-            // console.log("Appliance API Response:", applianceResponse.data); // Debugging log removed
-            if (
-              applianceResponse.data &&
-              applianceResponse.data.success &&
-              applianceResponse.data.data
-            ) {
-              // Check for nested data
-              if (applianceResponse.data.data.accepted === false) {
-                // Corrected access
-                // User has applied but is pending acceptance
-                setShowPendingMessage(true);
-                setShowAddKnowledgeButton(false);
-                setCanRegisterAsVerifier(false); // Cannot register again if pending
-              } else {
-                // User IS a verifier for this document (accepted: true or no 'accepted' field implies accepted)
-                setShowAddKnowledgeButton(true);
-                setCanRegisterAsVerifier(false); // User is already a verifier, cannot register
-                setShowPendingMessage(false);
-              }
-            } else {
-              // User is NOT a verifier for this document (success: false or no data)
-              setShowAddKnowledgeButton(false);
-              setCanRegisterAsVerifier(true); // User is not a verifier, can register
-              setShowPendingMessage(false);
-            }
-          } catch (error) {
-            const axiosError = error as AxiosError;
-            // If it's an expected auth error (401/403), a 404 (not found),
-            // or a 400 with "DATA IS NOT FOUND" (DOC05FV055), treat as not a verifier
-            if (
-              axiosError.response &&
-              (axiosError.response.status === 401 ||
-                axiosError.response.status === 403 ||
-                axiosError.response.status === 404 ||
-                (axiosError.response.status === 400 &&
-                  (axiosError.response.data as any)?.error_code ===
-                    "DOC05FV055" &&
-                  (axiosError.response.data as any)?.message ===
-                    "DATA IS NOT FOUND"))
-            ) {
-              setShowAddKnowledgeButton(false);
-              setCanRegisterAsVerifier(true); // User is not a verifier or not logged in, can register
-              setShowPendingMessage(false); // Not pending if not found
-              console.warn(
-                "Failed to fetch appliance status (expected for unauthenticated/not found/not a verifier):",
-                axiosError
-              );
-            } else {
-              // Other unexpected errors
-              console.error("Failed to fetch appliance status:", error);
-              setShowAddKnowledgeButton(false);
-              setCanRegisterAsVerifier(true); // Default to showing register button on unexpected error
-              setShowPendingMessage(false);
-            }
-          }
+// Fetch appliance status to determine both add knowledge and verifier button visibility
+const applianceResponse = await getApplianceStatus(documentId, true);
+if (
+  applianceResponse.data &&
+  applianceResponse.data.success &&
+  applianceResponse.data.data
+) {
+  // Check for nested data
+  if (applianceResponse.data.data.accepted === false) {
+    // Corrected access
+    // User has applied but is pending acceptance
+    setShowPendingMessage(true);
+    setShowAddKnowledgeButton(false);
+    setCanRegisterAsVerifier(false); // Cannot register again if pending
+  } else {
+    // User IS a verifier for this document (accepted: true or no 'accepted' field implies accepted)
+    setShowAddKnowledgeButton(true);
+    setCanRegisterAsVerifier(false); // User is already a verifier, cannot register
+    setShowPendingMessage(false);
+  }
+} else {
+  // User is NOT a verifier for this document (success: false or no data)
+  setShowAddKnowledgeButton(false);
+  setCanRegisterAsVerifier(true); // User is not a verifier, can register
+  setShowPendingMessage(false);
+}
 
           if (checkAuthStatus()) {
             // Use the imported isAuthenticated function

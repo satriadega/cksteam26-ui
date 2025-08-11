@@ -22,13 +22,16 @@ const RegisterPage: React.FC = () => {
     setErrors({}); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:8081/auth/registration", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, name, email, password }),
-      });
+      const response = await fetch(
+        "http://192.168.0.104:8081/auth/registration",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, name, email, password }),
+        }
+      );
 
       const data = await response.json();
 

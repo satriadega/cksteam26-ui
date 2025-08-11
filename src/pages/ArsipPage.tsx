@@ -3,7 +3,6 @@ import { getDocuments } from "../api";
 import type { Document } from "../types/document";
 import { Link } from "react-router-dom";
 import VersionButton from "../components/VersionButton";
-import { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
 import type { RootState } from "../store";
@@ -26,13 +25,7 @@ const ArsipPage: React.FC = () => {
         setDocuments(response.data.data.content);
         setTotalPages(response.data.data.total_pages);
       } catch (error) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response && axiosError.response.status === 400) {
-          setDocuments([]);
-          setTotalPages(0);
-        } else {
-          console.error("Error fetching documents:", error);
-        }
+        console.error("Error fetching documents:", error);
       } finally {
         dispatch(hideModal());
       }

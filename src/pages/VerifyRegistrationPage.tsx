@@ -14,7 +14,10 @@ const VerifyRegistrationPage: React.FC = () => {
     return (
       <div className="relative flex flex-col items-center justify-center min-h-screen bg-white">
         <div className="absolute top-4 left-4">
-          <a href="/" className="text-accent hover:underline text-lg font-medium">
+          <a
+            href="/"
+            className="text-accent hover:underline text-lg font-medium"
+          >
             Home
           </a>
         </div>
@@ -49,7 +52,7 @@ const VerifyRegistrationPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8081/auth/verify-registration",
+        "http://192.168.0.104:8081/auth/verify-registration",
         {
           method: "POST",
           headers: {

@@ -8,9 +8,6 @@ export const fetchDocuments = createAsyncThunk('documents/fetchDocuments', async
     return response.data.data.content;
   } catch (error) {
     const axiosError = error as AxiosError;
-    if (axiosError.response && axiosError.response.status === 400) {
-      return [];
-    }
     return rejectWithValue(axiosError.response?.data || axiosError.message);
   }
 });

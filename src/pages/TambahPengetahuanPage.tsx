@@ -407,29 +407,27 @@ const TambahPengetahuanPage: React.FC = () => {
             Sedang menunggu diterima
           </p>
         )}
-        {canAddKnowledge && (
-          <>
+        <>
+          <button
+            onClick={handleMarkText}
+            className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+          >
+            {autoMarking === true
+              ? "Sedang menandai kalimat"
+              : "Tandai kalimat"}
+          </button>
+          {autoMarking && (
             <button
-              onClick={handleMarkText}
-              className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+              onClick={stopMarkText}
+              className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
             >
-              {autoMarking === true
-                ? "Sedang menandai kalimat"
-                : "Tandai kalimat"}
+              Berhenti menandai kalimat
             </button>
-            {autoMarking && (
-              <button
-                onClick={stopMarkText}
-                className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
-              >
-                Berhenti menandai kalimat
-              </button>
-            )}
-          </>
-        )}
+          )}
+        </>
       </div>
 
-      {canAddKnowledge && showAnnotationBox && (
+      {showAnnotationBox && (
         <div className="p-4 border rounded-md mt-4 text-left">
           <h3 className="text-lg font-bold mb-2">Buat Anotasi</h3>
           {selectedText && (

@@ -69,7 +69,11 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleDeleteProfile = async () => {
-    if (!window.confirm("Are you sure you want to delete your profile? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete your profile? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -82,11 +86,11 @@ const ProfilePage: React.FC = () => {
         throw new Error("No authentication token found.");
       }
 
-      const response = await fetch("http://localhost:8081/profile", {
+      const response = await fetch("http://192.168.0.104:8081/profile", {
         method: "DELETE",
         headers: {
-          "Accept": "*/*",
-          "Authorization": `Bearer ${token}`, // Use the dynamically retrieved token
+          Accept: "*/*",
+          Authorization: `Bearer ${token}`, // Use the dynamically retrieved token
         },
       });
 
@@ -109,9 +113,7 @@ const ProfilePage: React.FC = () => {
       }
       setError(errorMessage);
       console.error(err);
-      dispatch(
-        showModal({ type: "error", message: errorMessage })
-      );
+      dispatch(showModal({ type: "error", message: errorMessage }));
     } finally {
       // The modal will be hidden by the user after they acknowledge the success/error message
     }

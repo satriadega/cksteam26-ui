@@ -34,7 +34,10 @@ const UpdateOrganisasiPage: React.FC = () => {
   const fetchOrganizations = () => {
     getOrganizations()
       .then((response) => {
-        setOrganizations(response.data.data);
+        const ownedOrganizations = response.data.data.filter(
+          (org: { organizationOwner: boolean }) => org.organizationOwner
+        );
+        setOrganizations(ownedOrganizations);
       })
       .catch((error) => {
         console.error("Error fetching organizations:", error);
@@ -194,121 +197,141 @@ const UpdateOrganisasiPage: React.FC = () => {
     <div className="container mt-8 mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-8">Update Organisasi</h1>
 
-      <div className="mb-4">
-        <label
-          htmlFor="organization"
-          className="block text-lg font-medium text-gray-700 mb-2"
-        >
-          Pilih Organisasi
-        </label>
-        <select
-          id="organization"
-          className="w-full p-2 border rounded mb-4"
-          onChange={(e) =>
-            setSelectedOrganizationId(
-              e.target.value ? parseInt(e.target.value) : null
-            )
-          }
-          value={selectedOrganizationId || ""}
-        >
-          <option value="">Pilih Organisasi</option>
-          {organizations.map((org) => (
-            <option key={org.organization.id} value={org.organization.id}>
-              {org.organization.organizationName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="organizationName"
-          className="block text-lg font-medium text-gray-700 mb-2"
-        >
-          Nama Organisasi
-        </label>
-        <input
-          type="text"
-          id="organizationName"
-          placeholder="Masukkan Nama Organisasi"
-          className="w-full p-2 border rounded mb-4"
-          value={organizationName}
-          onChange={(e) => setOrganizationName(e.target.value)}
-          disabled={!selectedOrganizationId}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="memberEmail"
-          className="block text-lg font-medium text-gray-700 mb-2"
-        >
-          Tambah Anggota (Email)
-        </label>
-        <div className="flex">
-          <input
-            type="email"
-            id="memberEmail"
-            placeholder="Masukkan email anggota"
-            className="w-full p-2 border rounded-l"
-            value={memberInput}
-            onChange={(e) => setMemberInput(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                handleAddMember();
+      {organizations.length > 0 ? (
+        <>
+          <div className="mb-4">
+            <label
+              htmlFor="organization"
+              className="block text-lg font-medium text-gray-700 mb-2"
+            >
+              Pilih Organisasi
+            </label>
+            <select
+              id="organization"
+              className="w-full p-2 border rounded mb-4"
+              onChange={(e) =>
+                setSelectedOrganizationId(
+                  e.target.value ? parseInt(e.target.value) : null
+                )
               }
-            }}
-            disabled={!selectedOrganizationId}
-          />
-          <button
-            onClick={handleAddMember}
-            className="bg-blue-500 text-white px-4 py-2 rounded-r disabled:opacity-50"
-            disabled={!selectedOrganizationId || memberInput.trim() === ""}
-          >
-            Tambah
-          </button>
-        </div>
-      </div>
+              value={selectedOrganizationId || ""}
+            >
+              <option value="">Pilih Organisasi</option>
+              {organizations.map((org) => (
+                <option key={org.organization.id} value={org.organization.id}>
+                  {org.organization.organizationName}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-2">Anggota Organisasi :</h2>
-        {members.length > 0 ? (
-          <ul className="list-disc list-inside mb-4">
-            {members.map((member: string, index: number) => (
-              <li key={index} className="flex justify-between items-center">
-                {member}
-                <button
-                  onClick={() => handleRemoveMember(member)}
-                  className="bg-red-500 text-white p-2 border- rounded-md mt-2 ml-4"
+          {selectedOrganizationId && (
+            <>
+              <div className="mb-4">
+                <label
+                  htmlFor="organizationName"
+                  className="block text-lg font-medium text-gray-700 mb-2"
                 >
-                  Hapus
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Tidak ada anggota.</p>
-        )}
-      </div>
+                  Nama Organisasi
+                </label>
+                <input
+                  type="text"
+                  id="organizationName"
+                  placeholder="Masukkan Nama Organisasi"
+                  className="w-full p-2 border rounded mb-4"
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                  disabled={!selectedOrganizationId}
+                />
+              </div>
 
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={handleDeleteOrganization}
-          className="bg-red-500 text-white px-6 py-2 rounded disabled:opacity-50"
-          disabled={!selectedOrganizationId}
-        >
-          Hapus Organisasi
-        </button>
-        <button
-          onClick={handleUpdateOrganization}
-          className="bg-green-500 text-white px-6 py-2 rounded disabled:opacity-50"
-          disabled={!selectedOrganizationId || organizationName.trim() === ""}
-        >
-          Simpan Perubahan
-        </button>
-      </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="memberEmail"
+                  className="block text-lg font-medium text-gray-700 mb-2"
+                >
+                  Tambah Anggota (Email)
+                </label>
+                <div className="flex">
+                  <input
+                    type="email"
+                    id="memberEmail"
+                    placeholder="Masukkan email anggota"
+                    className="w-full p-2 border rounded-l"
+                    value={memberInput}
+                    onChange={(e) => setMemberInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleAddMember();
+                      }
+                    }}
+                    disabled={!selectedOrganizationId}
+                  />
+                  <button
+                    onClick={handleAddMember}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-r disabled:opacity-50"
+                    disabled={
+                      !selectedOrganizationId || memberInput.trim() === ""
+                    }
+                  >
+                    Tambah
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h2 className="text-xl font-bold mb-2">
+                  Anggota Organisasi :
+                </h2>
+                {members.length > 0 ? (
+                  <ul className="list-disc list-inside mb-4">
+                    {members.map((member: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center"
+                      >
+                        {member}
+                        <button
+                          onClick={() => handleRemoveMember(member)}
+                          className="bg-red-500 text-white p-2 border- rounded-md mt-2 ml-4"
+                        >
+                          Hapus
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Tidak ada anggota.</p>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={handleDeleteOrganization}
+                  className="bg-red-500 text-white px-6 py-2 rounded disabled:opacity-50"
+                  disabled={!selectedOrganizationId}
+                >
+                  Hapus Organisasi
+                </button>
+                <button
+                  onClick={handleUpdateOrganization}
+                  className="bg-green-500 text-white px-6 py-2 rounded disabled:opacity-50"
+                  disabled={
+                    !selectedOrganizationId || organizationName.trim() === ""
+                  }
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        <p className="text-center text-gray-500">
+          Anda bukan pemilik organisasi manapun.
+        </p>
+      )}
     </div>
   );
 };
-
 export default UpdateOrganisasiPage;

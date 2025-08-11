@@ -21,6 +21,7 @@ import TambahPengetahuanPage from "./pages/TambahPengetahuanPage";
 import BuatOrganisasiPage from "./pages/BuatOrganisasiPage";
 import UpdateOrganisasiPage from "./pages/UpdateOrganisasiPage";
 import ListAppliancePage from "./pages/ListAppliancePage";
+import ListVerifierPage from "./pages/ListVerifierPage";
 import Modal from "./components/Modal";
 
 function App() {
@@ -103,6 +104,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ListAppliancePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/list-verifier"
+            element={
+              <ProtectedRoute>
+                <ListVerifierPage />
               </ProtectedRoute>
             }
           />

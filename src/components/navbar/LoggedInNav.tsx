@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { NavbarLoggedInProps } from "../../types/navbar";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchTerm } from "../../store/searchSlice";
 import type { RootState } from "../../store";
@@ -15,7 +15,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] =
     useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [notificationType, setNotificationType] = useState(0); // Add new state for notification type
+  const [notificationType, setNotificationType] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -27,7 +27,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
       try {
         const response = await getProfile();
         setNotificationCount(response.data.data[0].notificationCounter);
-        setNotificationType(response.data.data[0].notificationType); // Set notification type
+        setNotificationType(response.data.data[0].notificationType);
       } catch (error) {
         console.error("Failed to fetch notification count or type:", error);
       }
@@ -73,7 +73,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
   const handleSearch = () => {
     dispatch(setSearchTerm(inputValue));
     navigate("/arsip");
-    toggleMobileMenu(); // Use toggleMobileMenu to ensure consistency
+    setMobileMenuOpen(false);
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -157,19 +157,27 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             </button>
           </div>
           <div className="flex items-center space-x-8 mr-8">
-            <Link to="/buat-arsip" className="text-white hover:text-text-main ">
+            <button
+              onClick={() => navigate("/buat-arsip")}
+              className="text-white hover:text-text-main"
+            >
               Buat arsip
-            </Link>
-            <Link
-              to="/arsip"
-              className="text-white hover:text-text-main "
-              onClick={handleClearSearch}
+            </button>
+            <button
+              onClick={() => {
+                handleClearSearch();
+                navigate("/arsip");
+              }}
+              className="text-white hover:text-text-main"
             >
               List Arsip
-            </Link>
-            <Link to="/dashboard" className="text-white hover:text-text-main ">
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-white hover:text-text-main"
+            >
               Dashboard
-            </Link>
+            </button>
 
             <div className="relative flex items-center" ref={notificationRef}>
               <div className="relative mr-8">
@@ -196,11 +204,13 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                   </span>
                 )}
                 {notificationDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
-                    <Link
-                      to="/list-verifier"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-                      onClick={() => setNotificationDropdownOpen(false)}
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-md shadow-lg py-2 z-20">
+                    <button
+                      onClick={() => {
+                        navigate("/list-verifier");
+                        setNotificationDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                     >
                       List Verifier
                       {(notificationType === 2 || notificationType === 3) && (
@@ -217,11 +227,13 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                           />
                         </svg>
                       )}
-                    </Link>
-                    <Link
-                      to="/list-appliance"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-                      onClick={() => setNotificationDropdownOpen(false)}
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/list-appliance");
+                        setNotificationDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                     >
                       List Pendaftaran Verifier
                       {(notificationType === 1 || notificationType === 3) && (
@@ -238,7 +250,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                           />
                         </svg>
                       )}
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -266,16 +278,15 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
 
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  <button
                     onClick={() => {
+                      navigate("/profile");
                       setDropdownOpen(false);
-                      toggleMobileMenu();
                     }}
+                    className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Profile
-                  </Link>
+                  </button>
                   <button
                     onClick={() => {
                       setDropdownOpen(false);
@@ -297,7 +308,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             className="text-white focus:outline-none"
           >
             <svg
-              className="h-6 w-6"
+              className="h-[40px] w-[40px]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -333,14 +344,11 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
               <div className="relative mr-8">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-[40px] w-[40px] text-white cursor-pointer hover:text-accent transition-colors duration-200"
+                  className="h-[40px] w-[40px] text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2}
-                  onClick={() =>
-                    setNotificationDropdownOpen(!notificationDropdownOpen)
-                  }
                 >
                   <path
                     strokeLinecap="round"
@@ -348,63 +356,10 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-
                 {notificationCount > 0 && (
                   <span className="absolute bottom-6 left-6 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white shadow-lg z-[999]">
                     {notificationCount}
                   </span>
-                )}
-                {notificationDropdownOpen && (
-                  <div className="absolute left-0 top-full mt-2 w-40 bg-white rounded-md shadow-lg py-2 z-20">
-                    <Link
-                      to="/list-verifier"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-                      onClick={() => {
-                        setNotificationDropdownOpen(false);
-                        toggleMobileMenu();
-                      }}
-                    >
-                      List Verifier
-                      {(notificationType === 2 || notificationType === 3) && (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 ml-2"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </Link>
-                    <Link
-                      to="/list-appliance"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-                      onClick={() => {
-                        setNotificationDropdownOpen(false);
-                        toggleMobileMenu();
-                      }}
-                    >
-                      List Pendaftaran Verifier
-                      {(notificationType === 1 || notificationType === 3) && (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-red-500 ml-2"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </Link>
-                  </div>
                 )}
               </div>
               <button
@@ -413,7 +368,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
+                  className="h-[40px] w-[40px]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -427,45 +382,89 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                 </svg>
               </button>
             </div>
-            <Link
-              to="/dashboard"
-              className="text-white hover:text-text-main"
+            <button
               onClick={() => {
-                toggleMobileMenu();
+                navigate("/dashboard");
+                setMobileMenuOpen(false);
               }}
+              className="text-white hover:text-text-main"
             >
               Dashboard
-            </Link>
-
-            <Link
-              to="/buat-arsip"
-              className="text-white hover:text-text-main"
+            </button>
+            <button
               onClick={() => {
-                toggleMobileMenu();
+                navigate("/buat-arsip");
+                setMobileMenuOpen(false);
               }}
+              className="text-white hover:text-text-main"
             >
               Buat arsip
-            </Link>
-            <Link
-              to="/arsip"
-              className="text-white hover:text-text-main"
+            </button>
+            <button
               onClick={() => {
                 handleClearSearch();
-                toggleMobileMenu();
+                navigate("/arsip");
+                setMobileMenuOpen(false);
               }}
+              className="text-white hover:text-text-main"
             >
               List arsip
-            </Link>
-            <Link
-              to="/profile"
-              className="text-white hover:text-text-main"
+            </button>
+            <button
               onClick={() => {
-                setDropdownOpen(false);
-                toggleMobileMenu();
+                navigate("/profile");
+                setMobileMenuOpen(false);
               }}
+              className="text-white hover:text-text-main"
             >
               Profile
-            </Link>
+            </button>
+            <button
+              onClick={() => {
+                navigate("/list-verifier");
+                setMobileMenuOpen(false);
+              }}
+              className="text-white hover:text-text-main flex items-center justify-between"
+            >
+              List Verifier
+              {(notificationType === 2 || notificationType === 3) && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-red-500 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => {
+                navigate("/list-appliance");
+                setMobileMenuOpen(false);
+              }}
+              className="text-white hover:text-text-main flex items-center justify-between"
+            >
+              List Pendaftaran Verifier
+              {(notificationType === 1 || notificationType === 3) && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-red-500 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm-1 4a1 1 0 102 0 1 1 0 00-2 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+            </button>
             <button
               onClick={() => {
                 setDropdownOpen(false);
@@ -476,7 +475,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
               Keluar
             </button>
           </div>
-          <div className="flex justify-between absolute w-11/12 px-4 bottom-6">
+          <div className="flex justify-between absolute w-11/12 px-4 bottom-20">
             <input
               type="text"
               placeholder="Cari"
@@ -509,10 +508,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
             )}
             <button
               type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleSearch();
-              }}
+              onClick={handleSearch}
               className="relative text-gray-400 hover:text-gray-700 left-8"
             >
               <svg

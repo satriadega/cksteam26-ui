@@ -26,95 +26,95 @@ const ListAppliancePage: React.FC = () => {
     return localStorage.getItem("token");
   };
 
-  useEffect(() => {
-    const fetchAppliances = async () => {
-      setLoading(true);
-      setError(null);
-      const bearerToken = getBearerToken();
+  const fetchAppliances = async () => {
+    setLoading(true);
+    setError(null);
+    const bearerToken = getBearerToken();
 
-      if (!bearerToken) {
-        dispatch(
-          showModal({
-            type: "error",
-            message: "Authentication token not found. Please log in.",
-            onConfirm: () => navigate("/login"),
-          })
-        );
-        setLoading(false);
-        return;
-      }
+    if (!bearerToken) {
+      dispatch(
+        showModal({
+          type: "error",
+          message: "Authentication token not found. Please log in.",
+          onConfirm: () => navigate("/login"),
+        })
+      );
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const response = await fetch(
-          `http://192.168.0.104:8081/appliance?page=${currentPage}&size=${itemsPerPage}`,
-          {
-            method: "GET",
-            headers: {
-              accept: "*/*",
-              Authorization: `Bearer ${bearerToken}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          // Check for specific "data not found" message from the backend
-          // Assuming the backend sends a message like "Data not found" or "No content"
-          if (
-            errorData.message &&
-            (errorData.message.toLowerCase().includes("not found") ||
-              errorData.message.toLowerCase().includes("no content"))
-          ) {
-            setAppliances([]); // Set to empty array
-            setTotalPages(1); // Reset total pages
-            setLoading(false); // Stop loading
-            setError(null); // Clear any previous error
-            return; // Exit the function, no modal needed
-          } else {
-            // For other types of errors, throw to be caught and show modal
-            throw new Error(
-              errorData.message ||
-                `Failed to fetch appliances with status: ${response.status}`
-            );
-          }
+    try {
+      const response = await fetch(
+        `http://192.168.0.104:8081/appliance?page=${currentPage}&size=${itemsPerPage}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "*/*",
+            Authorization: `Bearer ${bearerToken}`,
+          },
         }
+      );
 
-        const result = await response.json();
-        if (result.success) {
-          if (result.data && result.data.content) {
-            setAppliances(result.data.content);
-            setTotalPages(result.data.total_pages);
-          } else {
-            // If success is true but data or content is empty/null, treat as no data found
-            setAppliances([]);
-            setTotalPages(1); // Reset total pages to 1 for empty data
-          }
+      if (!response.ok) {
+        const errorData = await response.json();
+        // Check for specific "data not found" message from the backend
+        // Assuming the backend sends a message like "Data not found" or "No content"
+        if (
+          errorData.message &&
+          (errorData.message.toLowerCase().includes("not found") ||
+            errorData.message.toLowerCase().includes("no content"))
+        ) {
+          setAppliances([]); // Set to empty array
+          setTotalPages(1); // Reset total pages
+          setLoading(false); // Stop loading
+          setError(null); // Clear any previous error
+          return; // Exit the function, no modal needed
         } else {
-          // If success is false, it's an actual error from the API
+          // For other types of errors, throw to be caught and show modal
           throw new Error(
-            result.message || "Unexpected API response structure or error"
+            errorData.message ||
+              `Failed to fetch appliances with status: ${response.status}`
           );
         }
-      } catch (err: unknown) {
-        let errorMessage = "Terjadi kesalahan saat mengambil data.";
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        }
-        // Show modal only for actual errors, not for "data not found" which is handled above
-        setError(errorMessage);
-        dispatch(
-          showModal({
-            type: "error",
-            message: errorMessage,
-          })
-        );
-      } finally {
-        setLoading(false);
       }
-    };
 
+      const result = await response.json();
+      if (result.success) {
+        if (result.data && result.data.content) {
+          setAppliances(result.data.content);
+          setTotalPages(result.data.total_pages);
+        } else {
+          // If success is true but data or content is empty/null, treat as no data found
+          setAppliances([]);
+          setTotalPages(1); // Reset total pages to 1 for empty data
+        }
+      } else {
+        // If success is false, it's an actual error from the API
+        throw new Error(
+          result.message || "Unexpected API response structure or error"
+        );
+      }
+    } catch (err: unknown) {
+      let errorMessage = "Terjadi kesalahan saat mengambil data.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      // Show modal only for actual errors, not for "data not found" which is handled above
+      setError(errorMessage);
+      dispatch(
+        showModal({
+          type: "error",
+          message: errorMessage,
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAppliances();
-  }, [currentPage, itemsPerPage, dispatch]); // bearerToken is now retrieved inside useEffect
+  }, [currentPage]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -162,11 +162,9 @@ const ListAppliancePage: React.FC = () => {
         showModal({
           type: "success",
           message: `Appliance ${documentId} updated successfully!`,
+          onConfirm: () => fetchAppliances(),
         })
       );
-      // Re-fetch appliances to update the list
-      // This will trigger the useEffect to run again
-      setCurrentPage(0); // Reset to first page after action
     } catch (err: unknown) {
       let errorMessage = "Terjadi kesalahan saat memperbarui data.";
       if (err instanceof Error) {
@@ -221,7 +219,7 @@ const ListAppliancePage: React.FC = () => {
                           true
                         )
                       }
-                      className="px-6 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+                      className="ml-2 px-6 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
                     >
                       Terima
                     </button>

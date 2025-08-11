@@ -65,32 +65,32 @@ const DetailArsipPage: React.FC = () => {
           const docResponse = await getDocumentById(documentId);
           setDocument(docResponse.data);
 
-// Fetch appliance status to determine both add knowledge and verifier button visibility
-const applianceResponse = await getApplianceStatus(documentId, true);
-if (
-  applianceResponse.data &&
-  applianceResponse.data.success &&
-  applianceResponse.data.data
-) {
-  // Check for nested data
-  if (applianceResponse.data.data.accepted === false) {
-    // Corrected access
-    // User has applied but is pending acceptance
-    setShowPendingMessage(true);
-    setShowAddKnowledgeButton(false);
-    setCanRegisterAsVerifier(false); // Cannot register again if pending
-  } else {
-    // User IS a verifier for this document (accepted: true or no 'accepted' field implies accepted)
-    setShowAddKnowledgeButton(true);
-    setCanRegisterAsVerifier(false); // User is already a verifier, cannot register
-    setShowPendingMessage(false);
-  }
-} else {
-  // User is NOT a verifier for this document (success: false or no data)
-  setShowAddKnowledgeButton(false);
-  setCanRegisterAsVerifier(true); // User is not a verifier, can register
-  setShowPendingMessage(false);
-}
+          // Fetch appliance status to determine both add knowledge and verifier button visibility
+          const applianceResponse = await getApplianceStatus(documentId, true);
+          if (
+            applianceResponse.data &&
+            applianceResponse.data.success &&
+            applianceResponse.data.data
+          ) {
+            // Check for nested data
+            if (applianceResponse.data.data.accepted === false) {
+              // Corrected access
+              // User has applied but is pending acceptance
+              setShowPendingMessage(true);
+              setShowAddKnowledgeButton(false);
+              setCanRegisterAsVerifier(false); // Cannot register again if pending
+            } else {
+              // User IS a verifier for this document (accepted: true or no 'accepted' field implies accepted)
+              setShowAddKnowledgeButton(true);
+              setCanRegisterAsVerifier(false); // User is already a verifier, cannot register
+              setShowPendingMessage(false);
+            }
+          } else {
+            // User is NOT a verifier for this document (success: false or no data)
+            setShowAddKnowledgeButton(false);
+            setCanRegisterAsVerifier(true); // User is not a verifier, can register
+            setShowPendingMessage(false);
+          }
 
           if (checkAuthStatus()) {
             // Use the imported isAuthenticated function
@@ -282,26 +282,26 @@ if (
       <div className="flex space-x-4 mb-8">
         {isAuthenticated && (
           <>
-            {(userProfile.username === document.username ||
-              document.isAnnotable) && (
-              <>
-                {showAddKnowledgeButton ||
-                  (userProfile.username === document.username && (
-                    <Link to={`/tambah-pengetahuan?documentId=${id}`}>
+            {userProfile.username === document.username &&
+              document.isAnnotable && (
+                <>
+                  {showAddKnowledgeButton ||
+                    (userProfile.username === document.username && (
+                      <Link to={`/tambah-pengetahuan?documentId=${id}`}>
+                        <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                          Tambahkan Pengetahuan
+                        </button>
+                      </Link>
+                    ))}
+                  {userProfile.username === document.username && (
+                    <Link to={`/buat-arsip?documentId=${id}`}>
                       <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                        Tambahkan Pengetahuan
+                        Tambahkan Versi
                       </button>
                     </Link>
-                  ))}
-                {userProfile.username === document.username && (
-                  <Link to={`/buat-arsip?documentId=${id}`}>
-                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                      Tambahkan Versi
-                    </button>
-                  </Link>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              )}
             {showPendingMessage && (
               <p className="text-center text-gray-600 font-semibold bg-yellow-400 p-2 rounded-sm">
                 Aplikasi Verifier Sedang menunggu diterima

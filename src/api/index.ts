@@ -19,20 +19,8 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const publicEndpoints = ["/public/document", "/public/document/related/"]; // Add more public endpoints if needed
-    const isPublicEndpoint = publicEndpoints.some((path) =>
-      error.config.url.includes(path)
-    );
-    const ignoreAuthErrorHeader =
-      error.config.headers?.["X-Ignore-Auth-Error"] === "true";
-
-    if (
-      error.response &&
-      error.response.data?.error_code === "X01001" &&
-      !isPublicEndpoint &&
-      !ignoreAuthErrorHeader
-    ) {
-      // Clear authentication and redirect to login only if it's not a public endpoint
+    if (error.response?.data?.error_code === "X01001") {
+      // Clear authentication and redirect to login
       clearAuth();
       window.location.href = "/login";
     }

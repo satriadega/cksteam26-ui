@@ -10,6 +10,7 @@ interface Appliance {
   name: string;
   email: string;
   accepted: boolean;
+  fullname: string;
 }
 
 const ListAppliancePage: React.FC = () => {
@@ -200,7 +201,7 @@ const ListAppliancePage: React.FC = () => {
                   <div className="flex-1">
                     <p className="text-lg">
                       <span className="font-semibold">{appliance.email}</span> /{" "}
-                      {appliance.name} ingin menjadi verifier di Arsip "
+                      {appliance.fullname} ingin menjadi verifier di Arsip "
                       <a
                         href={`/arsip/${appliance.documentId}`}
                         className="text-blue-600 hover:underline"
@@ -210,7 +211,7 @@ const ListAppliancePage: React.FC = () => {
                       "
                     </p>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 flex-col gap-2 md:flex-row">
                     <button
                       onClick={() =>
                         handleAccept(

@@ -73,6 +73,7 @@ const DetailArsipPage: React.FC = () => {
             applianceResponse.data.data
           ) {
             // Check for nested data
+            console.log(applianceResponse.data.data.accepted, "hi ga");
             if (applianceResponse.data.data.accepted === false) {
               // Corrected access
               // User has applied but is pending acceptance
@@ -282,26 +283,25 @@ const DetailArsipPage: React.FC = () => {
       <div className="flex space-x-4 mb-8">
         {isAuthenticated && (
           <>
-            {userProfile.username === document.username &&
-              document.isAnnotable && (
-                <>
-                  {showAddKnowledgeButton ||
-                    (userProfile.username === document.username && (
-                      <Link to={`/tambah-pengetahuan?documentId=${id}`}>
-                        <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                          Tambahkan Pengetahuan
-                        </button>
-                      </Link>
-                    ))}
-                  {userProfile.username === document.username && (
-                    <Link to={`/buat-arsip?documentId=${id}`}>
-                      <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
-                        Tambahkan Versi
-                      </button>
-                    </Link>
-                  )}
-                </>
-              )}
+            {document.isAnnotable && (
+              <>
+                {(showAddKnowledgeButton ||
+                  userProfile.username === document.username) && (
+                  <Link to={`/tambah-pengetahuan?documentId=${id}`}>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                      Tambahkan Pengetahuan
+                    </button>
+                  </Link>
+                )}
+                {userProfile.username === document.username && (
+                  <Link to={`/buat-arsip?documentId=${id}`}>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">
+                      Tambahkan Versi
+                    </button>
+                  </Link>
+                )}
+              </>
+            )}
             {showPendingMessage && (
               <p className="text-center text-gray-600 font-semibold bg-yellow-400 p-2 rounded-sm">
                 Aplikasi Verifier Sedang menunggu diterima

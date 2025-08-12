@@ -212,7 +212,7 @@ const LoggedInNav: React.FC<NavbarLoggedInProps> = ({ onLogout }) => {
                       }}
                       className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between"
                     >
-                      List Verifier
+                      List Verifier Pengetahuan
                       {(notificationType === 2 || notificationType === 3) && (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

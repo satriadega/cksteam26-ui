@@ -15,7 +15,7 @@ const DashboardPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // This will be the actual query sent to API
   const [documentFilterColumn] = useState("title");
-  const [documentSort, setDocumentSort] = useState("asc");
+  const [documentSort, setDocumentSort] = useState("desc");
   const documentSortBy = "id"; // Default sort by ID for documents
 
   const [annotationSearchTerm, setAnnotationSearchTerm] = useState("");
@@ -28,7 +28,7 @@ const DashboardPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [annotationCurrentPage, setAnnotationCurrentPage] = useState(0);
   const [annotationTotalPages, setAnnotationTotalPages] = useState(0); // Update annotationTotalPages
-  const [annotationSort, setAnnotationSort] = useState("asc");
+  const [annotationSort, setAnnotationSort] = useState("desc");
 
   // New state to manage active filter type
   const [activeDocumentFilter, setActiveDocumentFilter] = useState<
@@ -224,10 +224,7 @@ const DashboardPage: React.FC = () => {
         {documents
           ?.filter((doc) => !doc.isError) // Keep only the isError filter
           .map((doc) => (
-            <div
-              key={doc.id}
-              className="block p-4 border rounded shadow"
-            >
+            <div key={doc.id} className="block p-4 border rounded shadow">
               <div className="flex flex-col md:flex-row justify-between items-start">
                 <div
                   className="
@@ -239,7 +236,7 @@ const DashboardPage: React.FC = () => {
                     Version {doc.version}.{doc.subversion}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {doc.isVerifiedAll
+                    {!doc.verifiedAll
                       ? "Belum Diverifikasi"
                       : "Telah Diverifikasi"}
                   </p>
@@ -268,14 +265,6 @@ const DashboardPage: React.FC = () => {
                   >
                     Lihat Arsip
                   </Link>
-                  {doc.isAnnotable && (
-                    <Link
-                      to={`/tambah-pengetahuan?documentId=${doc.id}`}
-                      className="bg-gray-800 text-white px-4 py-2 rounded w-full text-center min-w-[280px]"
-                    >
-                      Tambahkan Pengetahuan
-                    </Link>
-                  )}
                 </div>
               </div>
             </div>
@@ -301,68 +290,6 @@ const DashboardPage: React.FC = () => {
           <span className="hidden md:inline">{">"}</span>
           <span className="md:hidden">Next</span>
         </button>
-      </div>
-
-      <div className="space-y-4">
-        {documents
-          ?.filter((doc) => doc.isError) // Keep only the isError filter
-          .map((doc) => (
-            <div
-              key={doc.id}
-              className="p-4 border rounded shadow"
-            >
-              <div className="flex flex-col md:flex-row justify-between items-start">
-                <div
-                  className="
-        max-w-full
-        md:max-w-[calc(100%-300px)] md:w-auto"
-                >
-                  <h3 className="text-xl font-bold">{doc.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    Version {doc.version}.{doc.subversion}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {doc.isVerifiedAll
-                      ? "Belum Diverifikasi"
-                      : "Telah Diverifikasi"}
-                  </p>
-                  <p className="mt-2 " style={{ wordWrap: "break-word" }}>
-                    {doc.content.substring(0, 300)}...
-                  </p>
-                  <div className="mt-2">
-                    {doc.tags?.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2"
-                      >
-                        #{tag.tagName}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Dibuat oleh {doc.name} pada{" "}
-                    {new Date(doc.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex flex-col space-y-2 mt-4 md:mt-0 w-full md:w-auto">
-                  <Link
-                    to={`/arsip/${doc.id}`}
-                    className="bg-gray-800 text-white px-4 py-2 rounded text-center w-full min-w-[280px]"
-                  >
-                    Lihat Arsip
-                  </Link>
-                  {doc.isAnnotable && (
-                    <Link
-                      to={`/tambah-pengetahuan?documentId=${doc.id}`}
-                      className="bg-gray-800 text-white px-4 py-2 rounded w-full text-center min-w-[280px]"
-                    >
-                      Tambahkan Pengetahuan
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
       </div>
 
       <h2 className="text-2xl font-bold text-center mb-4 mt-8">

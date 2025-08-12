@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getRelatedDocuments } from "../api";
 import type { Version } from "../types/document";
 import { useDispatch } from "react-redux";
@@ -13,6 +13,7 @@ interface VersionButtonProps {
 }
 
 const VersionButton: React.FC<VersionButtonProps> = ({ document }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [versions, setVersions] = useState<Version[]>([]);
   const [showVersions, setShowVersions] = useState(false);
@@ -57,6 +58,7 @@ const VersionButton: React.FC<VersionButtonProps> = ({ document }) => {
     } else {
       dispatch(showModal({ type: "loading", message: "Memuat versi..." }));
       setShowVersions(false);
+      navigate(`/arsip/${versionId}`);
     }
   };
 
@@ -75,14 +77,11 @@ const VersionButton: React.FC<VersionButtonProps> = ({ document }) => {
               <li
                 key={version.id}
                 className="hover:bg-gray-100 cursor-pointer text-sm font-normal"
+                onClick={() => handleVersionClick(version.id)}
               >
-                <Link
-                  to={`/arsip/${version.id}`}
-                  onClick={() => handleVersionClick(version.id)}
-                  className="block px-4 py-2"
-                >
+                <span className="block px-4 py-2">
                   Version {version.version}.{version.subversion || 0}
-                </Link>
+                </span>
               </li>
             ))}
           </ul>

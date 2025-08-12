@@ -4,9 +4,9 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import "./input.css";
 import App from "./App.tsx";
-import { isAuthenticated } from './utils/auth';
-import { setUser } from './store/userSlice';
-import { getProfile } from './api'; // Import getProfile
+import { isAuthenticated } from "./utils/auth";
+import { setUser } from "./store/userSlice";
+import { getProfile } from "./api"; // Import getProfile
 
 // Check authentication status on app load and dispatch setUser if authenticated
 const initializeAuth = async () => {
@@ -17,10 +17,17 @@ const initializeAuth = async () => {
     try {
       const profileResponse = await getProfile();
       // Assuming profileResponse.data is { data: [{ username: "..." }] }
-      if (profileResponse.data && profileResponse.data.data && profileResponse.data.data.length > 0) {
+      if (
+        profileResponse.data &&
+        profileResponse.data.data &&
+        profileResponse.data.data.length > 0
+      ) {
         const fetchedUsername = profileResponse.data.data[0].username || null;
         store.dispatch(setUser({ username: fetchedUsername }));
-        console.log("User profile fetched and Redux state updated on app load. Username:", fetchedUsername);
+        console.log(
+          "User profile fetched and Redux state updated on app load. Username:",
+          fetchedUsername
+        );
       } else {
         console.warn("No user profile data found on app load.");
         localStorage.removeItem("token");

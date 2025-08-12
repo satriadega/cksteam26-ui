@@ -19,11 +19,24 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.data?.error_code === "X01001") {
-      // Clear authentication and redirect to login
+    const errorCode = error.response?.data?.error_code;
+    const currentPath = window.location.pathname;
+
+    // On DetailArsipPage or BuatArsipPage, do not redirect on X01001
+    if (
+      (currentPath.startsWith("/arsip/") ||
+        currentPath.startsWith("/buat-arsip")) &&
+      errorCode === "X01001"
+    ) {
+      return Promise.reject(error);
+    }
+
+    // For other cases, redirect on any authentication error
+    if (error.response?.status === 401 || errorCode === "X01001") {
       clearAuth();
       window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );

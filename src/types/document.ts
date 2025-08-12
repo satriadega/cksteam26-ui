@@ -36,7 +36,7 @@ export interface Document {
   annotations: Annotation[] | null;
   username: string;
   isAnnotable: boolean;
-  isVerifiedAll: boolean;
+  verifiedAll: boolean;
   isError: boolean; // Added isError property
 }
 

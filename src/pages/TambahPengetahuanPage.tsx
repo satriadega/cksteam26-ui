@@ -404,25 +404,27 @@ const TambahPengetahuanPage: React.FC = () => {
       <div className="flex space-x-4 mb-8">
         {showPendingMessage && (
           <p className="text-center text-gray-600 font-semibold bg-yellow-400 p-2 rounded-sm">
-            Sedang menunggu diterima
+            Aplikasi Verifier Sedang menunggu diterima
           </p>
         )}
         <>
-          <button
-            onClick={handleMarkText}
-            className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
-          >
-            {autoMarking === true
-              ? "Sedang menandai kalimat"
-              : "Tandai kalimat"}
-          </button>
-          {autoMarking && (
-            <button
-              onClick={stopMarkText}
-              className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
-            >
-              Berhenti menandai kalimat
-            </button>
+          {!showPendingMessage && (
+            <>
+              <button
+                onClick={handleMarkText}
+                className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+              >
+                {autoMarking ? "Sedang menandai kalimat" : "Tandai kalimat"}
+              </button>
+              {autoMarking && (
+                <button
+                  onClick={stopMarkText}
+                  className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+                >
+                  Berhenti menandai kalimat
+                </button>
+              )}
+            </>
           )}
         </>
       </div>

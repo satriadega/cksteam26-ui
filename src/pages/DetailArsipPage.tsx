@@ -10,7 +10,6 @@ import {
 } from "../api";
 import type { Document, Version } from "../types/document";
 import { showModal, hideModal } from "../store/modalSlice";
-import { AxiosError } from "axios";
 import type { RootState } from "../store";
 import { isAuthenticated as checkAuthStatus } from "../utils/auth";
 
@@ -362,6 +361,9 @@ const DetailArsipPage: React.FC = () => {
               </p>
               <p className="text-text-light text-sm mb-1">
                 Dibuat pada {formatDate(annotation.createdAt)}
+              </p>
+              <p className="text-text-light text-sm mb-1">
+                Status: {annotation.isVerified ? <span className="text-green-600 font-semibold">Verified</span> : <span className="text-red-600 font-semibold">Not Verified</span>}
               </p>
               {annotation.tags.length > 0 && (
                 <div className="flex flex-wrap items-center text-text-light text-sm mb-1">

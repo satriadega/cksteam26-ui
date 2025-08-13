@@ -3,16 +3,16 @@ import { getProfile, updateProfile } from "../api";
 import type { Profile } from "../types/profile";
 import { useDispatch } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [statusNotification, setStatusNotification] = useState(true); // Changed to boolean
+  const [statusNotification, setStatusNotification] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {

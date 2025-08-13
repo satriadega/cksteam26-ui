@@ -164,23 +164,26 @@ export const registerAsVerifier = (id: number, ignoreAuthError = false) => {
   });
 };
 
-export const getApplianceStatus = async (id: number, ignoreAuthError = false) => {
+export const getApplianceStatus = async (
+  id: number,
+  ignoreAuthError = false
+) => {
   try {
     const response = await api.get(`/appliance/${id}`, {
       headers: getAuthHeaders(ignoreAuthError),
     });
     return response;
   } catch (error) {
-const axiosError = error as AxiosError<ApiErrorData>;
-if (
-  axiosError.response &&
-  (axiosError.response.status === 401 ||
-	axiosError.response.status === 403 ||
-	axiosError.response.status === 404 ||
-	(axiosError.response.status === 400 &&
-	  axiosError.response.data?.error_code === "DOC05FV055" &&
-	  axiosError.response.data?.message === "DATA IS NOT FOUND"))
-) {
+    const axiosError = error as AxiosError<ApiErrorData>;
+    if (
+      axiosError.response &&
+      (axiosError.response.status === 401 ||
+        axiosError.response.status === 403 ||
+        axiosError.response.status === 404 ||
+        (axiosError.response.status === 400 &&
+          axiosError.response.data?.error_code === "DOC05FV055" &&
+          axiosError.response.data?.message === "DATA IS NOT FOUND"))
+    ) {
       // Return a specific structure for "not a verifier" cases
       return {
         data: {
@@ -310,4 +313,20 @@ export const updateOrganization = (
 
 export const deleteOrganization = (id: number) => {
   return api.delete(`/organization/${id}`, { headers: getAuthHeaders() });
+};
+
+export const getVerifierAnnotations = () => {
+  return api.get("/annotation/verifier", { headers: getAuthHeaders() });
+};
+
+export const updateAnnotationStatus = (annotationId: number, action: "accept" | "reject") => {
+  return api.put(`/annotation/verifier/${annotationId}?action=${action}`, null, {
+    headers: getAuthHeaders(),
+  });
+};
+
+export const getAnnotationById = (annotationId: number) => {
+  return api.get(`/annotation/detail/${annotationId}`, {
+    headers: getAuthHeaders(),
+  });
 };

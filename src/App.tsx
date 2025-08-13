@@ -22,9 +22,20 @@ import BuatOrganisasiPage from "./pages/BuatOrganisasiPage";
 import UpdateOrganisasiPage from "./pages/UpdateOrganisasiPage";
 import ListAppliancePage from "./pages/ListAppliancePage";
 import ListVerifierPage from "./pages/ListVerifierPage";
+import VerifyPengetahuanPage from "./pages/VerifyPengetahuanPage";
 import Modal from "./components/Modal";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getProfile } from "./store/userSlice";
+import type { AppDispatch } from "./store";
 
 function App() {
+  const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    if (isAuthenticated()) {
+      dispatch(getProfile());
+    }
+  }, [dispatch]);
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return isAuthenticated() ? children : <Navigate to="/login" />;
   };
@@ -112,6 +123,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ListVerifierPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/verify-pengetahuan/:annotationId"
+            element={
+              <ProtectedRoute>
+                <VerifyPengetahuanPage />
               </ProtectedRoute>
             }
           />

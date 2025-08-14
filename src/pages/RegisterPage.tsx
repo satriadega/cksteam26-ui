@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../api";
 import { useDispatch } from "react-redux";
 import { showModal } from "../store/modalSlice";
 
@@ -23,7 +24,7 @@ const RegisterPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.104:8081/auth/registration",
+        `${API_URL}/auth/registration`,
         {
           method: "POST",
           headers: {

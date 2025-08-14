@@ -2,7 +2,13 @@ import axios from "axios";
 import { isAuthenticated, clearAuth } from "../utils/auth";
 import type { Document } from "../types/document";
 
-const API_URL = "http://192.168.0.104:8081";
+// Access the runtime configuration
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const runtimeConfig = (window as any).runtimeConfig;
+
+// Use the API URL from the runtime configuration, or a default value if it's not set.
+export const API_URL =
+  runtimeConfig?.VITE_API_URL || "http://localhost:8084";
 
 import type { AxiosRequestConfig, AxiosError } from "axios";
 
@@ -214,16 +220,30 @@ export const getProfile = () => {
   });
 };
 
-export const updateProfile = (data: {
-  name: string;
-  password?: string;
-  statusNotification: boolean;
-}) => {
+export const updateProfile = (
+  data: {
+    name: string;
+    password?: string;
+    statusNotification: boolean;
+  },
+  file?: File | null
+) => {
+  const formData = new FormData();
+  formData.append(
+    "data",
+    new Blob([JSON.stringify(data)], { type: "application/json" })
+  );
+
+  if (file) {
+    formData.append("file", file);
+  }
+
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
     ...getAuthHeaders(),
   };
-  return api.put("/profile", data, { headers });
+
+  return api.put("/profile", formData, { headers });
 };
 
 export const createDocument = (data: {

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { getAuthToken } from "../utils/auth";
+import { API_URL } from "../api";
 
 interface Profile {
   username: string;
@@ -31,7 +32,7 @@ export const getProfile = createAsyncThunk("user/getProfile", async () => {
   if (!token) {
     throw new Error("No auth token found");
   }
-  const response = await axios.get("http://192.168.0.104:8081/profile", {
+  const response = await axios.get(`${API_URL}/profile`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

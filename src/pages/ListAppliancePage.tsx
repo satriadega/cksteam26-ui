@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { showModal } from "../store/modalSlice";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../api";
 
 interface Appliance {
   documentId: number;
@@ -46,7 +47,7 @@ const ListAppliancePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.0.104:8081/appliance?page=${currentPage}&size=${itemsPerPage}`,
+        `${API_URL}/appliance?page=${currentPage}&size=${itemsPerPage}`,
         {
           method: "GET",
           headers: {
@@ -140,7 +141,7 @@ const ListAppliancePage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.0.104:8081/appliance/${documentId}`,
+        `${API_URL}/appliance/${documentId}`,
         {
           method: "PUT",
           headers: {

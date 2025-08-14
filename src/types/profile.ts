@@ -6,6 +6,7 @@ export interface Profile {
   hasNotification: boolean;
   notificationCounter: number;
   notificationType: number;
+  pathFoto: string | null;
 }
 
 export interface ProfileResponse {

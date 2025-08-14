@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProfile, updateProfile } from "../api";
+import { getProfile, updateProfile, API_URL } from "../api";
 import type { Profile } from "../types/profile";
 import { useDispatch } from "react-redux";
 import { showModal, hideModal } from "../store/modalSlice";
@@ -13,6 +13,8 @@ const ProfilePage: React.FC = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [statusNotification, setStatusNotification] = useState(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -22,6 +24,7 @@ const ProfilePage: React.FC = () => {
         const profileData: Profile = response.data.data[0];
         setName(profileData.name);
         setStatusNotification(profileData.statusNotification);
+        setProfileImage(profileData.pathFoto);
       } catch (err) {
         setError("Failed to fetch profile data.");
         console.error(err);
@@ -53,7 +56,7 @@ const ProfilePage: React.FC = () => {
       if (password) {
         data.password = password;
       }
-      await updateProfile(data);
+      await updateProfile(data, file);
       dispatch(
         showModal({ type: "success", message: "Profile updated successfully!" })
       );
@@ -86,7 +89,7 @@ const ProfilePage: React.FC = () => {
         throw new Error("No authentication token found.");
       }
 
-      const response = await fetch("http://192.168.0.104:8081/profile", {
+      const response = await fetch(`${API_URL}/profile`, {
         method: "DELETE",
         headers: {
           Accept: "*/*",
@@ -128,7 +131,18 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Ubah Akun</h1>
-      <form className="max-w-md" onSubmit={handleSubmit}>
+      <div className="flex justify-center mb-8">
+        <img
+          src={
+            profileImage
+              ? `${API_URL}${profileImage}`
+              : "https://static.vecteezy.com/system/resources/previews/003/715/527/non_2x/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-vector.jpg"
+          }
+          alt="Profile"
+          className="w-32 h-32 rounded-full object-cover border-4 border-gray-300"
+        />
+      </div>
+      <form className="max-w-md mx-auto" onSubmit={handleSubmit}>
         <div className="mb-6">
           <label
             htmlFor="name"
@@ -157,6 +171,20 @@ const ProfilePage: React.FC = () => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className="mb-6">
+          <label
+            htmlFor="file"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Profile Picture
+          </label>
+          <input
+            type="file"
+            id="file"
+            onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
         <div className="mb-6">

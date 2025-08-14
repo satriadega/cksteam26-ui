@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showModal } from "../store/modalSlice";
 import { setUser } from "../store/userSlice";
+import { API_URL } from "../api";
 
 interface ErrorType {
   [key: string]: string;
@@ -25,7 +26,7 @@ const LoginPage: React.FC = () => {
     setErrors({});
 
     try {
-      const response = await fetch("http://192.168.0.104:8081/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

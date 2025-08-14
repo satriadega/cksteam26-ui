@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { showModal } from "../store/modalSlice";
+import { API_URL } from "../api";
 
 const VerifyRegistrationPage: React.FC = () => {
   const location = useLocation();
@@ -52,7 +53,7 @@ const VerifyRegistrationPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        "http://192.168.0.104:8081/auth/verify-registration",
+        `${API_URL}/auth/verify-registration`,
         {
           method: "POST",
           headers: {
